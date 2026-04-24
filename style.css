@@ -50,15 +50,15 @@ h1, h2, h3 {
     border: 1px solid rgba(255,255,255,0.05);
 }
 
-/* Artist Mark - Middle, Bottom, Less Transparent */
+/* Artist Mark - Placed naturally at the bottom, no overlapping */
 .artist-mark {
-    position: fixed;
-    bottom: 15px;
-    left: 50%;
-    transform: translateX(-50%);
+    text-align: center;
     font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.65); /* Less transparent for readability */
+    color: rgba(255, 255, 255, 0.65);
     font-family: 'Inter', -apple-system, sans-serif;
     letter-spacing: 0.5px;
-    z-index: 999;
+    margin-top: 60px; /* Pushes it well below the last chart/table */
+    padding-bottom: 20px;
+    display: block;
+    width: 100%;
 }
