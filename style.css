@@ -49,3 +49,13 @@ h1, h2, h3 {
     padding: 15px;
     border: 1px solid rgba(255,255,255,0.05);
 }
+
+
+# ... [Existing routing code above] ...
+elif st.session_state.current_page == "Outage_Monitoring":
+    render_subpage("🚨 Outage Monitoring", "Live tracking of grid disruptions and resolution status.", "Active Outages", "2", "Grid Stability Metric")
+
+# -----------------------------------------
+# ARTIST MARK (Global Footer)
+# -----------------------------------------
+st.markdown("<div class='artist-mark'>Wrought with ❤️ by Jay Joshi</div>", unsafe_allow_html=True)
