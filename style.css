@@ -1,46 +1,53 @@
-/* style.css - High Readability Version */
+/* style.css */
 
 /* Hide Default Streamlit Branding */
 #MainMenu {visibility: hidden;}
 header {visibility: hidden;}
 footer {visibility: hidden;}
 
-/* Main App Background - Clean, Solid Dark Slate */
+/* Main App Background - Deep Tech Utility Gradient */
 .stApp {
-    background-color: #121826;
-    color: #e2e8f0;
+    background: linear-gradient(135deg, #0b132b, #1c2541, #3a506b);
+    color: #f0f2f6;
     font-family: 'Inter', -apple-system, sans-serif;
 }
 
-/* Crisp, Readable Grid Buttons */
+/* Elite Button Styling */
 div.stButton > button:first-child {
-    background-color: #1e293b;
+    background-color: rgba(255, 255, 255, 0.05);
     color: #ffffff;
-    border: 1px solid #334155;
-    border-radius: 8px;
-    padding: 20px 15px;
+    border: 1px solid rgba(116, 164, 188, 0.3);
+    border-radius: 12px;
+    padding: 25px 15px;
     font-size: 1.1rem;
     font-weight: 600;
-    transition: all 0.2s ease;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
+/* Button Hover State - Neon Glow Effect */
 div.stButton > button:first-child:hover {
-    background-color: #2563eb; /* Clear Blue Hover */
-    border-color: #60a5fa;
-    color: white;
+    background-color: rgba(91, 192, 190, 0.2);
+    border-color: #5bc0be;
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(91, 192, 190, 0.4);
+    color: #5bc0be;
 }
 
-/* Clear Headings */
+/* Custom Typography for Headers */
 h1, h2, h3 {
-    color: #f8fafc !important;
+    color: #5bc0be !important;
+    font-weight: 700;
 }
 
-/* DataFrames & Containers - Clean borders, no blurry glassmorphism */
+/* Glassmorphism for DataFrames & Containers */
 [data-testid="stDataFrame"], [data-testid="stMetric"] {
-    background-color: #1e293b;
-    border-radius: 6px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
     padding: 15px;
-    border: 1px solid #334155;
+    border: 1px solid rgba(255,255,255,0.05);
 }
 
 /* Artist Mark - Middle, Bottom, Less Transparent */
@@ -50,7 +57,7 @@ h1, h2, h3 {
     left: 50%;
     transform: translateX(-50%);
     font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.7); /* Much higher visibility */
+    color: rgba(255, 255, 255, 0.65); /* Less transparent for readability */
     font-family: 'Inter', -apple-system, sans-serif;
     letter-spacing: 0.5px;
     z-index: 999;
