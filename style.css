@@ -1,61 +1,57 @@
-/* style.css */
+/* style.css - High Readability Version */
 
 /* Hide Default Streamlit Branding */
 #MainMenu {visibility: hidden;}
 header {visibility: hidden;}
 footer {visibility: hidden;}
 
-/* Main App Background - Deep Tech Utility Gradient */
+/* Main App Background - Clean, Solid Dark Slate */
 .stApp {
-    background: linear-gradient(135deg, #0b132b, #1c2541, #3a506b);
-    color: #f0f2f6;
+    background-color: #121826;
+    color: #e2e8f0;
     font-family: 'Inter', -apple-system, sans-serif;
 }
 
-/* Elite Button Styling (Used for Home Grid Cards) */
+/* Crisp, Readable Grid Buttons */
 div.stButton > button:first-child {
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: #1e293b;
     color: #ffffff;
-    border: 1px solid rgba(116, 164, 188, 0.3);
-    border-radius: 12px;
-    padding: 25px 15px;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 20px 15px;
     font-size: 1.1rem;
     font-weight: 600;
-    letter-spacing: 0.5px;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
 }
 
-/* Button Hover State - Neon Glow Effect */
 div.stButton > button:first-child:hover {
-    background-color: rgba(91, 192, 190, 0.2);
-    border-color: #5bc0be;
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(91, 192, 190, 0.4);
-    color: #5bc0be;
+    background-color: #2563eb; /* Clear Blue Hover */
+    border-color: #60a5fa;
+    color: white;
 }
 
-/* Custom Typography for Headers */
+/* Clear Headings */
 h1, h2, h3 {
-    color: #5bc0be !important;
-    font-weight: 700;
+    color: #f8fafc !important;
 }
 
-/* Glassmorphism for DataFrames & Containers */
+/* DataFrames & Containers - Clean borders, no blurry glassmorphism */
 [data-testid="stDataFrame"], [data-testid="stMetric"] {
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
+    background-color: #1e293b;
+    border-radius: 6px;
     padding: 15px;
-    border: 1px solid rgba(255,255,255,0.05);
+    border: 1px solid #334155;
 }
 
-
-# ... [Existing routing code above] ...
-elif st.session_state.current_page == "Outage_Monitoring":
-    render_subpage("🚨 Outage Monitoring", "Live tracking of grid disruptions and resolution status.", "Active Outages", "2", "Grid Stability Metric")
-
-# -----------------------------------------
-# ARTIST MARK (Global Footer)
-# -----------------------------------------
-st.markdown("<div class='artist-mark'>Wrought with ❤️ by Jay Joshi</div>", unsafe_allow_html=True)
+/* Artist Mark - Middle, Bottom, Less Transparent */
+.artist-mark {
+    position: fixed;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7); /* Much higher visibility */
+    font-family: 'Inter', -apple-system, sans-serif;
+    letter-spacing: 0.5px;
+    z-index: 999;
+}
