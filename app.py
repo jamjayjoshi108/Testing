@@ -11,8 +11,8 @@ from streamlit_lottie import st_lottie
 # PAGE CONFIGURATION
 # -----------------------------------------
 st.set_page_config(
-    page_title="Elite Interface",
-    page_icon="✨",
+    page_title="Utility Operations Portal",
+    page_icon="⚡",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -35,115 +35,134 @@ def load_lottieurl(url: str):
         if r.status_code != 200:
             return None
         return r.json()
-    except Exception as e:
+    except Exception:
         return None
 
 # -----------------------------------------
-# INITIALIZATION & STATE
+# NAVIGATION LOGIC
 # -----------------------------------------
-# 1. Load the customized UI theme
-load_css("style.css")
+if 'current_page' not in st.session_state:
+    st.session_state.current_page = "Homepage"
 
-# 2. Initialize interactive session state variables
-if 'system_activated' not in st.session_state:
-    st.session_state.system_activated = False
-
-# 3. Fetch premium Lottie animation (Placeholder: Abstract Tech Sphere)
-LOTTIE_URL = "https://assets9.lottiefiles.com/packages/lf20_qp1q7mct.json"
-lottie_anim = load_lottieurl(LOTTIE_URL)
+def navigate(page_name):
+    """Updates session state to route to a new page."""
+    st.session_state.current_page = page_name
 
 # -----------------------------------------
-# MAIN LAYOUT
+# VIEW FUNCTIONS
 # -----------------------------------------
-st.markdown("<h1>⚡ Advanced Operations Dashboard</h1>", unsafe_allow_html=True)
+def render_homepage(lottie_anim):
+    """Renders the main grid menu based on the wireframe."""
+    
+    # Hero Section
+    col_anim, col_text = st.columns([1, 3], gap="large")
+    with col_anim:
+        if lottie_anim:
+            st_lottie(lottie_anim, height=180, key="hero_animation")
+    with col_text:
+        st.markdown("<h1>⚡ Utility Operations Command Center</h1>", unsafe_allow_html=True)
+        st.write("Select an operational module below to access real-time dashboards and management tools.")
 
-# Top Grid Layout
-col_anim, col_text = st.columns([1, 2.5], gap="large")
+    st.markdown("---")
 
-with col_anim:
-    if lottie_anim:
-        st_lottie(lottie_anim, height=220, key="hero_animation")
-    else:
-        st.warning("Animation failed to load.")
+    # The 6 Grid Buttons (3x2 Layout for Elite UI)
+    col1, col2, col3 = st.columns(3, gap="large")
+    
+    with col1:
+        if st.button("🛠️ PTW, LM-ALM Application", use_container_width=True):
+            navigate("PTW_LM_ALM")
+            st.rerun()
+        if st.button("📡 Smart Meter", use_container_width=True):
+            navigate("Smart_Meter")
+            st.rerun()
+            
+    with col2:
+        if st.button("📉 Outage Reduction Plan (ORP)", use_container_width=True):
+            navigate("ORP")
+            st.rerun()
+        if st.button("🔌 New Connections", use_container_width=True):
+            navigate("New_Connections")
+            st.rerun()
+            
+    with col3:
+        if st.button("🏢 RDSS", use_container_width=True):
+            navigate("RDSS")
+            st.rerun()
+        if st.button("🚨 Outage Monitoring", use_container_width=True):
+            navigate("Outage_Monitoring")
+            st.rerun()
 
-with col_text:
-    st.markdown("### Next-Generation Data Interaction")
-    st.write(
-        "Welcome to a fully customized Streamlit environment. By leveraging injected CSS, "
-        "interactive state management, and high-performance charting, we break free from "
-        "standard column layouts."
+def render_subpage(title, description, metric_label, metric_val, chart_title):
+    """A dynamic template for the individual module pages."""
+    
+    # Navigation Back Button
+    if st.button("← Return to Homepage", use_container_width=False):
+        navigate("Homepage")
+        st.rerun()
+        
+    st.markdown(f"<h2>{title}</h2>", unsafe_allow_html=True)
+    st.write(description)
+    
+    # Trigger a visually pleasing toast notification on load
+    st.toast(f"{title} data streams connected.", icon="✅")
+
+    # Metrics Layout
+    col_m1, col_m2, col_m3 = st.columns(3)
+    col_m1.metric(label=metric_label, value=metric_val, delta="↑ 4.2%")
+    col_m2.metric(label="System Uptime", value="99.9%", delta="Stable", delta_color="off")
+    col_m3.metric(label="Pending Alerts", value="3", delta="-2", delta_color="inverse")
+    
+    # Dynamic Plotly Visualization
+    st.markdown("### Real-Time Telemetry")
+    
+    # Generate dummy data
+    time_series = pd.date_range("2026-04-20", periods=20, freq="H")
+    data = pd.DataFrame({
+        "Time": time_series,
+        "Value": np.random.normal(100, 15, 20).cumsum()
+    })
+    
+    # Elite Plotly Chart
+    fig = px.area(
+        data, x="Time", y="Value", 
+        title=chart_title,
+        color_discrete_sequence=["#5bc0be"]
     )
     
-    # Interactive trigger changing session state with a "Wow" factor
-    if st.button("Initialize Core Systems"):
-        st.session_state.system_activated = True
-        st.toast("Core systems online. Data successfully mapped.", icon="🚀")
-        st.balloons()
-
-st.markdown("---")
+    # Transparent background to blend with CSS
+    fig.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(color="#ffffff"),
+        margin=dict(l=0, r=0, t=40, b=0),
+        xaxis=dict(showgrid=False),
+        yaxis=dict(showgrid=True, gridcolor="rgba(255,255,255,0.1)")
+    )
+    
+    st.plotly_chart(fig, use_container_width=True)
 
 # -----------------------------------------
-# DYNAMIC TABS & DATA VISUALIZATION
+# MAIN EXECUTION
 # -----------------------------------------
-tab_analytics, tab_config, tab_logs = st.tabs(["📊 Analytics Engine", "⚙️ Parameters", "📋 System Logs"])
+load_css("style.css")
 
-with tab_analytics:
-    if st.session_state.system_activated:
-        # Generate dynamic dummy data
-        df = pd.DataFrame(
-            np.random.randn(100, 3),
-            columns=["Alpha", "Beta", "Gamma"]
-        )
-        # Shift data to be strictly positive for better visual scaling
-        df = df - df.min() + 1 
-        
-        # Advanced Plotly Visualization
-        fig = px.scatter(
-            df, 
-            x="Alpha", 
-            y="Beta", 
-            size="Gamma", 
-            color="Gamma",
-            color_continuous_scale=px.colors.sequential.Tealgrn,
-            title="Multidimensional Cluster Analysis"
-        )
-        
-        # Transparent background to inherit our CSS gradient
-        fig.update_layout(
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(color="#ffffff"),
-            margin=dict(l=0, r=0, t=40, b=0)
-        )
-        
-        st.plotly_chart(fig, use_container_width=True)
-        
-        # Collapsible detailed view
-        with st.expander("🔍 Inspect Raw Data Matrices"):
-            col_data1, col_data2 = st.columns(2)
-            with col_data1:
-                st.dataframe(df.head(10).style.background_gradient(cmap='Teal', axis=0))
-            with col_data2:
-                st.metric(label="System Efficiency", value="98.4%", delta="2.1%")
-                st.metric(label="Data Throughput", value="1.2 GB/s", delta="0.4 GB/s")
-                
-    else:
-        # Guidance state before activation
-        st.info("👈 System is currently idle. Click 'Initialize Core Systems' above to generate visualizations.")
+# Load a relevant abstract/tech lottie animation (Placeholder URL)
+LOTTIE_URL = "https://assets2.lottiefiles.com/packages/lf20_1yzdv8qx.json" 
+anim = load_lottieurl(LOTTIE_URL)
 
-with tab_config:
-    st.subheader("Global Settings")
-    col_set1, col_set2 = st.columns(2)
-    with col_set1:
-        st.slider("Render Resolution (px)", min_value=720, max_value=2160, value=1080, step=100)
-        st.toggle("Enable Hardware Acceleration", value=True)
-    with col_set2:
-        st.selectbox("Data Stream Protocol", ["WebSocket", "REST API", "GraphQL via Polling"])
-
-with tab_logs:
-    st.code("""
-    [STATUS] Boot sequence initiated...
-    [SUCCESS] CSS stylesheet successfully injected.
-    [SUCCESS] Lottie assets retrieved from CDN.
-    [WAITING] Awaiting user prompt for system activation...
-    """, language="bash")
+# Route to the correct view based on session state
+if st.session_state.current_page == "Homepage":
+    render_homepage(anim)
+elif st.session_state.current_page == "PTW_LM_ALM":
+    render_subpage("🛠️ PTW, LM-ALM Application", "Permit to Work and Asset Lifecycle Management operations.", "Active Permits", "1,204", "Asset Utilization Index")
+elif st.session_state.current_page == "ORP":
+    render_subpage("📉 Outage Reduction Plan", "Monitoring and executing the ORP guidelines.", "Outage Incidents", "14", "Reduction Trend (MTBF)")
+elif st.session_state.current_page == "RDSS":
+    render_subpage("🏢 RDSS", "Revamped Distribution Sector Scheme analytics.", "Funds Disbursed", "₹420Cr", "Implementation Progress")
+elif st.session_state.current_page == "Smart_Meter":
+    render_subpage("📡 Smart Meter", "AMI (Advanced Metering Infrastructure) tracking.", "Meters Installed", "45,210", "Deployment Velocity")
+elif st.session_state.current_page == "New_Connections":
+    render_subpage("🔌 New Connections", "Processing pipeline for new utility requests.", "Pending Connections", "312", "Application Clearance Rate")
+elif st.session_state.current_page == "Outage_Monitoring":
+    render_subpage("🚨 Outage Monitoring", "Live tracking of grid disruptions and resolution status.", "Active Outages", "2", "Grid Stability Metric")
+    
