@@ -171,19 +171,19 @@ def render_orp_page():
     df = pd.DataFrame(orp_data)
     numeric_cols = ["South", "East", "North", "Border", "West", "Central"]
 
-    # 2. Custom Conditional Formatting Logic (Clean Colors)
+    # 2. Custom Conditional Formatting Logic (Logical, Readable Colors)
     def color_coding(val):
-        """Standard, readable traffic-light colors."""
+        """Logical traffic-light colors that ensure white text is readable."""
         if isinstance(val, (int, float)):
             if val == 100:
-                # Solid Green
-                return 'background-color: #15803d; color: white;'
+                # Deep Green for 100%
+                return 'background-color: #2e7d32; color: #ffffff; font-weight: bold;'
             elif val >= 80:
-                # Solid Yellow/Orange
-                return 'background-color: #b45309; color: white;'
+                # Warm Orange/Yellow for 80% - 99%
+                return 'background-color: #f57c00; color: #ffffff; font-weight: bold;'
             else:
-                # Solid Red
-                return 'background-color: #b91c1c; color: white;'
+                # Deep Red for below 80%
+                return 'background-color: #c62828; color: #ffffff; font-weight: bold;'
         return ''
 
     # Apply styles and format as percentages
@@ -192,13 +192,16 @@ def render_orp_page():
     )
 
     st.markdown("### Progress till 25-Apr-26")
+    st.dataframe(styled_df, use_container_width=True, hide_index=True)
+    
+    st.markdown("---")
     
     # 3. Layout: Table on Top, Visuals Below
     st.dataframe(styled_df, use_container_width=True, hide_index=True)
     
     st.markdown("---")
     
-    # 4. Elite Interactive Heatmap (Clean Colors)
+    # 4. Elite Interactive Heatmap (Logical Colors)
     st.markdown("### Regional Heatmap Analysis")
     heatmap_df = df.set_index("%age progress in ORP")
     
@@ -207,20 +210,23 @@ def render_orp_page():
         text_auto="%d%%", 
         aspect="auto",
         color_continuous_scale=[
-            [0.0, "#b91c1c"],  # Pure Red
-            [0.5, "#b45309"],  # Pure Orange/Yellow
-            [1.0, "#15803d"]   # Pure Green
+            [0.0, "#c62828"],  # Deep Red
+            [0.5, "#f57c00"],  # Warm Orange
+            [1.0, "#2e7d32"]   # Deep Green
         ],
         zmin=60, zmax=100
     )
     
-    # Clean background for the chart
+    # Apply glassmorphism styling to the chart background
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="#f8fafc", size=14),
-        margin=dict(l=0, r=0, t=10, b=0)
+        font=dict(color="#ffffff", size=14),
+        margin=dict(l=0, r=0, t=10, b=0),
+        xaxis=dict(title="", showgrid=False),
+        yaxis=dict(title="", showgrid=False)
     )
+    
     fig.update_traces(showscale=False)
     st.plotly_chart(fig, use_container_width=True)
     
