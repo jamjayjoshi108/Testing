@@ -171,19 +171,19 @@ def render_orp_page():
     df = pd.DataFrame(orp_data)
     numeric_cols = ["South", "East", "North", "Border", "West", "Central"]
 
-    # 2. Custom Conditional Formatting Logic
+    # 2. Custom Conditional Formatting Logic (Clean Colors)
     def color_coding(val):
-        """Applies traffic-light color coding matching the provided image."""
+        """Standard, readable traffic-light colors."""
         if isinstance(val, (int, float)):
             if val == 100:
-                # Green for 100%
-                return 'background-color: rgba(91, 192, 190, 0.4); color: #ffffff;'
+                # Solid Green
+                return 'background-color: #15803d; color: white;'
             elif val >= 80:
-                # Yellow for 80% - 99%
-                return 'background-color: rgba(244, 208, 63, 0.4); color: #ffffff;'
+                # Solid Yellow/Orange
+                return 'background-color: #b45309; color: white;'
             else:
-                # Red for below 80%
-                return 'background-color: rgba(231, 76, 60, 0.4); color: #ffffff;'
+                # Solid Red
+                return 'background-color: #b91c1c; color: white;'
         return ''
 
     # Apply styles and format as percentages
@@ -198,38 +198,30 @@ def render_orp_page():
     
     st.markdown("---")
     
-    # 4. Elite Interactive Heatmap
+    # 4. Elite Interactive Heatmap (Clean Colors)
     st.markdown("### Regional Heatmap Analysis")
-    
-    # Set the index so the Y-axis labels are the categories
     heatmap_df = df.set_index("%age progress in ORP")
     
-    # Build Plotly Heatmap
     fig = px.imshow(
         heatmap_df,
         text_auto="%d%%", 
         aspect="auto",
         color_continuous_scale=[
-            [0.0, "rgba(231, 76, 60, 0.8)"],   # Red
-            [0.5, "rgba(244, 208, 63, 0.8)"],  # Yellow
-            [1.0, "rgba(91, 192, 190, 0.8)"]   # Green
+            [0.0, "#b91c1c"],  # Pure Red
+            [0.5, "#b45309"],  # Pure Orange/Yellow
+            [1.0, "#15803d"]   # Pure Green
         ],
         zmin=60, zmax=100
     )
     
-    # Apply glassmorphism styling to the chart
+    # Clean background for the chart
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="#ffffff", size=14),
-        margin=dict(l=0, r=0, t=10, b=0),
-        xaxis=dict(title="", showgrid=False),
-        yaxis=dict(title="", showgrid=False)
+        font=dict(color="#f8fafc", size=14),
+        margin=dict(l=0, r=0, t=10, b=0)
     )
-    
-    # Hide the color scale bar for a cleaner look since text is auto-applied
     fig.update_traces(showscale=False)
-    
     st.plotly_chart(fig, use_container_width=True)
     
 # -----------------------------------------
@@ -256,7 +248,6 @@ elif st.session_state.current_page == "New_Connections":
     render_subpage("🔌 New Connections", "Processing pipeline for new utility requests.", "Pending Connections", "312", "Application Clearance Rate")
 elif st.session_state.current_page == "Outage_Monitoring":
     render_subpage("🚨 Outage Monitoring", "Live tracking of grid disruptions and resolution status.", "Active Outages", "2", "Grid Stability Metric")
-
 
 # -----------------------------------------
 # ARTIST MARK (Global Footer)
