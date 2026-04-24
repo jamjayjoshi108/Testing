@@ -165,4 +165,9 @@ elif st.session_state.current_page == "New_Connections":
     render_subpage("🔌 New Connections", "Processing pipeline for new utility requests.", "Pending Connections", "312", "Application Clearance Rate")
 elif st.session_state.current_page == "Outage_Monitoring":
     render_subpage("🚨 Outage Monitoring", "Live tracking of grid disruptions and resolution status.", "Active Outages", "2", "Grid Stability Metric")
-    
+
+
+# -----------------------------------------
+# ARTIST MARK (Global Footer)
+# -----------------------------------------
+st.markdown("<div class='artist-mark'>Wrought with ❤️ by Jay Joshi</div>", unsafe_allow_html=True)
