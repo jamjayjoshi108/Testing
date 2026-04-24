@@ -5,68 +5,47 @@
 header {visibility: hidden;}
 footer {visibility: hidden;}
 
-/* Main App Background - Premium Dark Gradient */
+/* Main App Background - Deep Tech Utility Gradient */
 .stApp {
-    background: linear-gradient(135deg, #0f2027, #203a43, #2ca1bf);
+    background: linear-gradient(135deg, #0b132b, #1c2541, #3a506b);
     color: #f0f2f6;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Inter', -apple-system, sans-serif;
 }
 
-/* Customizing Tabs for a Modern Look */
-.stTabs [data-baseweb="tab-list"] {
-    gap: 15px;
-    padding-bottom: 5px;
-}
-
-.stTabs [data-baseweb="tab"] {
-    height: 45px;
-    background-color: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
-    color: #e0e0e0;
-    padding: 10px 24px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: all 0.3s ease;
-}
-
-.stTabs [aria-selected="true"] {
-    background-color: rgba(44, 161, 191, 0.8);
-    border: 1px solid #45c4e5;
-    color: white;
-    font-weight: bold;
-    box-shadow: 0 4px 12px rgba(44, 161, 191, 0.3);
-}
-
-/* Elite Button Styling with Hover Effects */
+/* Elite Button Styling (Used for Home Grid Cards) */
 div.stButton > button:first-child {
-    background-color: rgba(255, 255, 255, 0.08);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    padding: 12px 28px;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+    border: 1px solid rgba(116, 164, 188, 0.3);
+    border-radius: 12px;
+    padding: 25px 15px;
+    font-size: 1.1rem;
     font-weight: 600;
     letter-spacing: 0.5px;
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
+/* Button Hover State - Neon Glow Effect */
 div.stButton > button:first-child:hover {
-    background-color: #2ca1bf;
-    border-color: #ffffff;
-    transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(44, 161, 191, 0.5);
+    background-color: rgba(91, 192, 190, 0.2);
+    border-color: #5bc0be;
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(91, 192, 190, 0.4);
+    color: #5bc0be;
+}
+
+/* Custom Typography for Headers */
+h1, h2, h3 {
+    color: #5bc0be !important;
+    font-weight: 700;
 }
 
 /* Glassmorphism for DataFrames & Containers */
-[data-testid="stDataFrame"] {
+[data-testid="stDataFrame"], [data-testid="stMetric"] {
     background-color: rgba(0, 0, 0, 0.2);
     border-radius: 10px;
-    padding: 10px;
-}
-
-/* Clean Expander Styling */
-.streamlit-expanderHeader {
-    background-color: rgba(255, 255, 255, 0.05) !important;
-    border-radius: 8px !important;
-    color: white !important;
-    border: 1px solid rgba(255,255,255,0.1);
+    padding: 15px;
+    border: 1px solid rgba(255,255,255,0.05);
 }
