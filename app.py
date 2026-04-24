@@ -141,6 +141,97 @@ def render_subpage(title, description, metric_label, metric_val, chart_title):
     
     st.plotly_chart(fig, use_container_width=True)
 
+def render_orp_page():
+    """Dedicated view for the Outage Reduction Plan (ORP) module."""
+    
+    # Navigation Back Button
+    if st.button("← Return to Homepage", use_container_width=False):
+        navigate("Homepage")
+        st.rerun()
+        
+    st.markdown("<h2>📉 Outage Reduction Plan (ORP)</h2>", unsafe_allow_html=True)
+    st.write("Regional progress tracking and execution metrics.")
+    st.toast("ORP regional data loaded.", icon="✅")
+
+    # 1. Define the Data from the User's Image
+    orp_data = {
+        "%age progress in ORP": [
+            "Feeder deloading", 
+            "DT Transformers New", 
+            "DT Transformers Augmentation", 
+            "66kV transformers deloaded"
+        ],
+        "South": [89, 98, 100, 60],
+        "East": [82, 99, 100, 89],
+        "North": [80, 100, 100, 75],
+        "Border": [84, 95, 95, 83],
+        "West": [79, 93, 100, 69],
+        "Central": [93, 100, 100, 77]
+    }
+    df = pd.DataFrame(orp_data)
+    numeric_cols = ["South", "East", "North", "Border", "West", "Central"]
+
+    # 2. Custom Conditional Formatting Logic
+    def color_coding(val):
+        """Applies traffic-light color coding matching the provided image."""
+        if isinstance(val, (int, float)):
+            if val == 100:
+                # Green for 100%
+                return 'background-color: rgba(91, 192, 190, 0.4); color: #ffffff;'
+            elif val >= 80:
+                # Yellow for 80% - 99%
+                return 'background-color: rgba(244, 208, 63, 0.4); color: #ffffff;'
+            else:
+                # Red for below 80%
+                return 'background-color: rgba(231, 76, 60, 0.4); color: #ffffff;'
+        return ''
+
+    # Apply styles and format as percentages
+    styled_df = df.style.map(color_coding, subset=numeric_cols).format(
+        {col: "{:.0f}%" for col in numeric_cols}
+    )
+
+    st.markdown("### Progress till 25-Apr-26")
+    
+    # 3. Layout: Table on Top, Visuals Below
+    st.dataframe(styled_df, use_container_width=True, hide_index=True)
+    
+    st.markdown("---")
+    
+    # 4. Elite Interactive Heatmap
+    st.markdown("### Regional Heatmap Analysis")
+    
+    # Set the index so the Y-axis labels are the categories
+    heatmap_df = df.set_index("%age progress in ORP")
+    
+    # Build Plotly Heatmap
+    fig = px.imshow(
+        heatmap_df,
+        text_auto="%d%%", 
+        aspect="auto",
+        color_continuous_scale=[
+            [0.0, "rgba(231, 76, 60, 0.8)"],   # Red
+            [0.5, "rgba(244, 208, 63, 0.8)"],  # Yellow
+            [1.0, "rgba(91, 192, 190, 0.8)"]   # Green
+        ],
+        zmin=60, zmax=100
+    )
+    
+    # Apply glassmorphism styling to the chart
+    fig.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(color="#ffffff", size=14),
+        margin=dict(l=0, r=0, t=10, b=0),
+        xaxis=dict(title="", showgrid=False),
+        yaxis=dict(title="", showgrid=False)
+    )
+    
+    # Hide the color scale bar for a cleaner look since text is auto-applied
+    fig.update_traces(showscale=False)
+    
+    st.plotly_chart(fig, use_container_width=True)
+    
 # -----------------------------------------
 # MAIN EXECUTION
 # -----------------------------------------
@@ -156,7 +247,7 @@ if st.session_state.current_page == "Homepage":
 elif st.session_state.current_page == "PTW_LM_ALM":
     render_subpage("🛠️ PTW, LM-ALM Application", "Permit to Work and Asset Lifecycle Management operations.", "Active Permits", "1,204", "Asset Utilization Index")
 elif st.session_state.current_page == "ORP":
-    render_subpage("📉 Outage Reduction Plan", "Monitoring and executing the ORP guidelines.", "Outage Incidents", "14", "Reduction Trend (MTBF)")
+    render_orp_page() # <-- Call the new function here instead of render_subpage
 elif st.session_state.current_page == "RDSS":
     render_subpage("🏢 RDSS", "Revamped Distribution Sector Scheme analytics.", "Funds Disbursed", "₹420Cr", "Implementation Progress")
 elif st.session_state.current_page == "Smart_Meter":
