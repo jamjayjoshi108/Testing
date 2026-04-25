@@ -132,13 +132,14 @@ def render_subpage(title, description, metric_label, metric_val, chart_title):
     )
     
     # Transparent background to blend with CSS
+    # Apply crisp dark fonts and transparent background 
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="#ffffff"),
-        margin=dict(l=0, r=0, t=40, b=0),
-        xaxis=dict(showgrid=False),
-        yaxis=dict(showgrid=True, gridcolor="rgba(255,255,255,0.1)")
+        font=dict(color="#0f172a", size=14, family="Segoe UI"), # Changed color to dark slate
+        margin=dict(l=0, r=0, t=10, b=0),
+        xaxis=dict(title="", showgrid=False, tickfont=dict(weight="bold")),
+        yaxis=dict(title="", showgrid=False, tickfont=dict(weight="bold"))
     )
     
     st.plotly_chart(fig, use_container_width=True)
@@ -241,38 +242,43 @@ def render_outage_monitoring_page():
         navigate("Homepage")
         st.rerun()
 
-    # --- ELITE THEME CSS OVERRIDES FOR THIS MODULE ---
-    # --- EXECUTIVE THEME CSS OVERRIDES FOR OUTAGE MODULE ---
+    # --- LIGHT GLASSMORPHISM OVERRIDES FOR OUTAGE MODULE ---
     st.markdown("""
         <style>
-            /* Professional Glassmorphism KPI Cards */
+            /* Frosted White Glass KPI Cards */
             .kpi-card { 
-                background: rgba(255, 255, 255, 0.03); 
-                border: 1px solid rgba(255, 255, 255, 0.1); 
-                backdrop-filter: blur(12px); 
-                border-radius: 8px; 
+                background: rgba(255, 255, 255, 0.55); 
+                border: 1px solid rgba(255, 255, 255, 0.9); 
+                backdrop-filter: blur(16px); 
+                border-radius: 12px; 
                 padding: 1.5rem; 
                 display: flex; flex-direction: column; justify-content: space-between; height: 100%; 
-                box-shadow: 0 4px 10px rgba(0,0,0,0.15); 
+                box-shadow: 0 4px 12px rgba(0,0,0,0.03); 
                 transition: all 0.3s ease; 
             }
             .kpi-card:hover { 
-                transform: translateY(-3px); 
-                box-shadow: 0 8px 20px rgba(0,0,0,0.3); 
-                border-color: rgba(14, 165, 233, 0.5); /* Corporate Blue Accent on Hover */
+                transform: translateY(-4px); 
+                box-shadow: 0 12px 24px rgba(0, 102, 204, 0.08); 
+                border-color: rgba(0, 102, 204, 0.4); 
             }
-            /* KPI Typography */
-            .kpi-title { color: #94a3b8 !important; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
-            .kpi-value { color: #ffffff !important; font-weight: 700; font-size: 2.4rem; margin-bottom: 0; line-height: 1.1; }
-            .kpi-subtext { color: #cbd5e1 !important; font-size: 0.85rem; margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: flex-start; gap: 15px; }
+            /* High Contrast KPI Typography */
+            .kpi-title { color: #475569 !important; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
+            .kpi-value { color: #0f172a !important; font-weight: 800; font-size: 2.6rem; margin-bottom: 0; line-height: 1.1; }
+            .kpi-subtext { color: #64748b !important; font-size: 0.85rem; margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid rgba(0, 0, 0, 0.05); display: flex; justify-content: flex-start; gap: 15px; }
             
-            /* Badges for active/closed status */
-            .status-badge { background-color: rgba(0, 0, 0, 0.4); padding: 4px 10px; border-radius: 4px; font-weight: 500; color: #f8fafc !important; border: 1px solid rgba(255,255,255,0.05); }
+            /* Status Badges */
+            .status-badge { background-color: rgba(0, 0, 0, 0.04); padding: 4px 10px; border-radius: 6px; font-weight: 600; color: #1e293b !important; border: 1px solid rgba(0,0,0,0.05); }
             
-            /* Clean DataFrame Borders */
-            [data-testid="stDataFrame"] > div { border: 1px solid rgba(255,255,255,0.1) !important; border-radius: 8px; overflow: hidden; background: rgba(0,0,0,0.2); }
+            /* Transparent DataFrames that let the background blur through */
+            [data-testid="stDataFrame"] > div { border: 1px solid rgba(255,255,255,0.8) !important; border-radius: 10px; overflow: hidden; background: rgba(255,255,255,0.4); }
         </style>
     """, unsafe_allow_html=True)
+
+    # Crisp, Light-Theme Table Headers
+    HEADER_STYLES = [
+        {'selector': 'th', 'props': [('background-color', 'rgba(241, 245, 249, 0.8) !important'), ('color', '#004085 !important'), ('font-weight', '700 !important'), ('text-align', 'center !important'), ('border-bottom', '2px solid rgba(0,0,0,0.05) !important')]},
+        {'selector': 'th div', 'props': [('color', '#004085 !important'), ('font-weight', '700 !important')]}
+    ]
 
     # Executive Table Headers - Subtle blue background with white text
     HEADER_STYLES = [
@@ -824,8 +830,8 @@ def render_outage_monitoring_page():
 # -----------------------------------------
 load_css("style.css")
 
-# Load a relevant abstract/tech lottie animation (Placeholder URL)
-LOTTIE_URL = "https://assets2.lottiefiles.com/packages/lf20_1yzdv8qx.json" 
+# Load a futuristic yet corporate light-theme Lottie animation
+LOTTIE_URL = "https://assets8.lottiefiles.com/packages/lf20_jcikwtux.json" 
 anim = load_lottieurl(LOTTIE_URL)
 
 # Route to the correct view based on session state
