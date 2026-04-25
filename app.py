@@ -144,18 +144,17 @@ def render_subpage(title, description, metric_label, metric_val, chart_title):
     st.plotly_chart(fig, use_container_width=True)
 
 def render_orp_page():
-    """Dedicated view for the Outage Reduction Plan (ORP) module."""
+    """Dedicated view for the Outage Reduction Plan (ORP) module - Executive Theme."""
     
     # Navigation Back Button
-    if st.button("← Return to Homepage", use_container_width=False):
+    if st.button("← Return to Dashboard Hub", use_container_width=False):
         navigate("Homepage")
         st.rerun()
         
     st.markdown("<h2>📉 Outage Reduction Plan (ORP)</h2>", unsafe_allow_html=True)
-    st.write("Regional progress tracking and execution metrics.")
-    st.toast("ORP regional data loaded.", icon="✅")
+    st.write("Executive overview of regional progress tracking and execution metrics.")
 
-    # 1. Define the Data from the User's Image
+    # 1. Define the Data from the original wireframe
     orp_data = {
         "%age progress in ORP": [
             "Feeder deloading", 
@@ -173,19 +172,19 @@ def render_orp_page():
     df = pd.DataFrame(orp_data)
     numeric_cols = ["South", "East", "North", "Border", "West", "Central"]
 
-    # 2. Custom Conditional Formatting Logic (Logical, Readable Colors)
+    # 2. Executive Corporate Formatting Logic
     def color_coding(val):
-        """Logical traffic-light colors that ensure white text is readable."""
+        """Authoritative corporate traffic-light colors with 80% opacity for glassmorphism."""
         if isinstance(val, (int, float)):
             if val == 100:
-                # Deep Green for 100%
-                return 'background-color: #2e7d32; color: #ffffff; font-weight: bold;'
+                # Corporate Emerald Green
+                return 'background-color: rgba(5, 150, 105, 0.8); color: #ffffff; font-weight: 600;'
             elif val >= 80:
-                # Warm Orange/Yellow for 80% - 99%
-                return 'background-color: #f57c00; color: #ffffff; font-weight: bold;'
+                # Corporate Amber/Yellow
+                return 'background-color: rgba(217, 119, 6, 0.8); color: #ffffff; font-weight: 600;'
             else:
-                # Deep Red for below 80%
-                return 'background-color: #c62828; color: #ffffff; font-weight: bold;'
+                # Corporate Crimson Red
+                return 'background-color: rgba(220, 38, 38, 0.8); color: #ffffff; font-weight: 600;'
         return ''
 
     # Apply styles and format as percentages
@@ -193,18 +192,16 @@ def render_orp_page():
         {col: "{:.0f}%" for col in numeric_cols}
     )
 
-    st.markdown("### Progress till 25-Apr-26")
+    st.markdown("#### Progress till 25-Apr-26")
+    
+    # 3. Layout: Clean, borderless table look
     st.dataframe(styled_df, use_container_width=True, hide_index=True)
     
     st.markdown("---")
     
-    # 3. Layout: Table on Top, Visuals Below
-    st.dataframe(styled_df, use_container_width=True, hide_index=True)
+    # 4. Executive Interactive Heatmap
+    st.markdown("#### Regional Heatmap Analysis")
     
-    st.markdown("---")
-    
-    # 4. Elite Interactive Heatmap (Logical Colors)
-    st.markdown("### Regional Heatmap Analysis")
     heatmap_df = df.set_index("%age progress in ORP")
     
     fig = px.imshow(
@@ -212,21 +209,21 @@ def render_orp_page():
         text_auto="%d%%", 
         aspect="auto",
         color_continuous_scale=[
-            [0.0, "#c62828"],  # Deep Red
-            [0.5, "#f57c00"],  # Warm Orange
-            [1.0, "#2e7d32"]   # Deep Green
+            [0.0, "#dc2626"],  # Corporate Crimson
+            [0.5, "#d97706"],  # Corporate Amber
+            [1.0, "#059669"]   # Corporate Emerald
         ],
         zmin=60, zmax=100
     )
     
-    # Apply glassmorphism styling to the chart background
+    # Apply crisp fonts and transparent background matching the CSS
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="#ffffff", size=14),
+        font=dict(color="#f8fafc", size=14, family="Segoe UI"),
         margin=dict(l=0, r=0, t=10, b=0),
-        xaxis=dict(title="", showgrid=False),
-        yaxis=dict(title="", showgrid=False)
+        xaxis=dict(title="", showgrid=False, tickfont=dict(weight="bold")),
+        yaxis=dict(title="", showgrid=False, tickfont=dict(weight="bold"))
     )
     
     fig.update_traces(showscale=False)
