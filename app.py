@@ -245,30 +245,43 @@ def render_outage_monitoring_page():
         st.rerun()
 
     # --- ELITE THEME CSS OVERRIDES FOR THIS MODULE ---
-    # Replaces the legacy corporate blue/yellow with our glassmorphism theme
+    # --- EXECUTIVE THEME CSS OVERRIDES FOR OUTAGE MODULE ---
     st.markdown("""
         <style>
+            /* Professional Glassmorphism KPI Cards */
             .kpi-card { 
-                background: rgba(0, 0, 0, 0.2); 
-                border: 1px solid rgba(116, 164, 188, 0.3); 
-                backdrop-filter: blur(10px); 
-                border-radius: 12px; 
+                background: rgba(255, 255, 255, 0.03); 
+                border: 1px solid rgba(255, 255, 255, 0.1); 
+                backdrop-filter: blur(12px); 
+                border-radius: 8px; 
                 padding: 1.5rem; 
                 display: flex; flex-direction: column; justify-content: space-between; height: 100%; 
-                box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s ease; 
+                box-shadow: 0 4px 10px rgba(0,0,0,0.15); 
+                transition: all 0.3s ease; 
             }
             .kpi-card:hover { 
-                transform: translateY(-4px); 
-                box-shadow: 0 8px 20px rgba(91, 192, 190, 0.2); 
-                border-color: #5bc0be;
+                transform: translateY(-3px); 
+                box-shadow: 0 8px 20px rgba(0,0,0,0.3); 
+                border-color: rgba(14, 165, 233, 0.5); /* Corporate Blue Accent on Hover */
             }
-            .kpi-title { color: #5bc0be !important; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
-            .kpi-value { color: #ffffff !important; font-weight: 700; font-size: 2.5rem; margin-bottom: 0; line-height: 1.1; }
-            .kpi-subtext { color: #a0aec0 !important; font-size: 0.85rem; margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: flex-start; gap: 15px; }
-            .status-badge { background-color: rgba(255, 255, 255, 0.1); padding: 4px 10px; border-radius: 6px; font-weight: 500; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.1); }
-            [data-testid="stDataFrame"] > div { border: 1px solid rgba(255,255,255,0.05) !important; border-radius: 10px; overflow: hidden; }
+            /* KPI Typography */
+            .kpi-title { color: #94a3b8 !important; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
+            .kpi-value { color: #ffffff !important; font-weight: 700; font-size: 2.4rem; margin-bottom: 0; line-height: 1.1; }
+            .kpi-subtext { color: #cbd5e1 !important; font-size: 0.85rem; margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: flex-start; gap: 15px; }
+            
+            /* Badges for active/closed status */
+            .status-badge { background-color: rgba(0, 0, 0, 0.4); padding: 4px 10px; border-radius: 4px; font-weight: 500; color: #f8fafc !important; border: 1px solid rgba(255,255,255,0.05); }
+            
+            /* Clean DataFrame Borders */
+            [data-testid="stDataFrame"] > div { border: 1px solid rgba(255,255,255,0.1) !important; border-radius: 8px; overflow: hidden; background: rgba(0,0,0,0.2); }
         </style>
     """, unsafe_allow_html=True)
+
+    # Executive Table Headers - Subtle blue background with white text
+    HEADER_STYLES = [
+        {'selector': 'th', 'props': [('background-color', 'rgba(14, 165, 233, 0.15) !important'), ('color', '#ffffff !important'), ('font-weight', '600 !important'), ('text-align', 'center !important'), ('border-bottom', '1px solid rgba(255, 255, 255, 0.1) !important')]},
+        {'selector': 'th div', 'props': [('color', '#ffffff !important'), ('font-weight', '600 !important')]}
+    ]
 
     # Elite Table Headers
     HEADER_STYLES = [
