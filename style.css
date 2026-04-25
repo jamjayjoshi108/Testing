@@ -1,14 +1,14 @@
-/* style.css - Executive Government Theme */
+/* style.css - Light Glassmorphism Executive Theme */
 
 /* Hide Default Streamlit Branding */
 #MainMenu {visibility: hidden;}
 header {visibility: hidden;}
 footer {visibility: hidden;}
 
-/* Main App Background - Deep Executive Slate/Navy */
+/* Main App Background - Soft Premium Ice/Slate Gradient */
 .stApp {
-    background: linear-gradient(135deg, #09111e, #131c2e, #1c2a43);
-    color: #f8fafc;
+    background: linear-gradient(135deg, #f0f4f8, #e2e8f0, #cbd5e1);
+    color: #0f172a; /* Deep slate for maximum text readability */
     font-family: 'Segoe UI', 'Inter', -apple-system, sans-serif;
 }
 
@@ -16,60 +16,58 @@ footer {visibility: hidden;}
 .block-container {
     padding-top: 2rem;
     padding-bottom: 4rem;
-    max-width: 95%; /* Utilizes screen real estate efficiently */
+    max-width: 95%; 
 }
 
-/* Elite, Dignified Navigation Buttons */
+/* Futuristic Light Glass Navigation Buttons */
 div.stButton > button:first-child {
-    background-color: rgba(255, 255, 255, 0.03);
-    color: #e2e8f0;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.55);
+    color: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
     padding: 20px 15px;
     font-size: 1.05rem;
     font-weight: 600;
     letter-spacing: 0.5px;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.03);
 }
 
-/* Button Hover - Professional Corporate Blue */
+/* Button Hover - Glides up, border turns Corporate Blue */
 div.stButton > button:first-child:hover {
-    background-color: rgba(14, 165, 233, 0.1); /* Subtle Blue */
-    border-color: #0ea5e9;
-    color: #ffffff;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(14, 165, 233, 0.2);
+    background-color: rgba(255, 255, 255, 0.9); 
+    border-color: #0066cc;
+    color: #0066cc;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 102, 204, 0.1);
 }
 
-/* Crisp, Official Typography */
+/* Crisp, Authoritative Typography */
 h1, h2, h3, h4 {
-    color: #ffffff !important;
-    font-weight: 600;
+    color: #0f172a !important; /* Almost black */
+    font-weight: 700;
     letter-spacing: -0.5px;
 }
-
 h1 { font-size: 2.2rem !important; }
-h2 { font-size: 1.6rem !important; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
+h2 { font-size: 1.6rem !important; border-bottom: 2px solid rgba(0,0,0,0.05); padding-bottom: 8px; }
 
-/* Global Glassmorphism for Streamlit Elements (DataFrames, Metrics) */
+/* Global Glassmorphism for DataFrames & Metrics */
 [data-testid="stDataFrame"], [data-testid="stMetric"] {
-    background-color: rgba(255, 255, 255, 0.02);
-    backdrop-filter: blur(12px);
-    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(16px);
+    border-radius: 12px;
     padding: 15px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
 }
 
-/* Artist Mark - Subtle and Anchored */
+/* Artist Mark */
 .artist-mark {
     text-align: center;
     font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.4);
+    color: #64748b; /* Professional subtle grey */
     font-family: 'Segoe UI', 'Inter', sans-serif;
-    letter-spacing: 0.5px;
     margin-top: 60px;
     padding-bottom: 20px;
     display: block;
