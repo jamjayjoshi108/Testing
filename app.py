@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone, date
 # ─────────────────────────────────────────────────────────────
 # PAGE CONFIGURATION
 # ─────────────────────────────────────────────────────────────
-st.set_page_config(page_title="Power Outage Monitoring Dashboard", layout="wide")
+st.set_page_config(page_title="Power Outage Monitoring Dashboard", layout="w ide")
 
 # ─────────────────────────────────────────────────────────────
 # GLOBAL TABLE HEADER STYLING
@@ -621,11 +621,6 @@ with tab3:
             # ── Step 2: Compute KPI counts BEFORE exploding feeders ───────
             total_ptws = filtered_ptw["ptw_id"].nunique()
 
-            truly_active = filtered_ptw[
-                ~filtered_ptw['current_status'].astype(str).str.upper().isin(
-                    ['CLOSED', 'COMPLETED', 'EXPIRED', 'REJECTED', 'CANCELLED', 'CANCELLATION']
-                )
-            ]["ptw_id"].nunique()
 
             # ── Step 3: Explode comma-separated feeders ───────────────────
             filtered_ptw['feeders'] = filtered_ptw['feeders'].astype(str).str.split(',')
@@ -661,8 +656,7 @@ with tab3:
                     f'<div class="kpi-title">Total PTW Requests</div>'
                     f'<div class="kpi-value">{total_ptws}</div>'
                     f'</div><div class="kpi-subtext">'
-                    f'<span class="status-badge">🟢 Active: {truly_active}</span>'
-                    f'<span class="status-badge">⚫ Closed: {total_ptws - truly_active}</span>'
+                    f'<span class="status-badge">📅 Selected Timeframe</span>'
                     f'</div></div>',
                     unsafe_allow_html=True
                 )
