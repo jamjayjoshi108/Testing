@@ -656,7 +656,6 @@ with tab3:
                     f'<div class="kpi-title">Total PTW Requests</div>'
                     f'<div class="kpi-value">{total_ptws}</div>'
                     f'</div><div class="kpi-subtext">'
-                    f'<span class="status-badge">📅 Selected Timeframe</span>'
                     f'</div></div>',
                     unsafe_allow_html=True
                 )
