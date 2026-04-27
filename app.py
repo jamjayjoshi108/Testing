@@ -608,9 +608,7 @@ with tab3:
     st.header("🛠️ PTW Frequency Tracker")
     start_d3, end_d3 = render_date_selector("tab3")
     st.divider()
-
-    st.markdown("Identifies specific feeders that had a Permit to Work (PTW) taken against them **two or more times** in separate requests over the selected timeframe.")
-
+    
     if df_ptw_master.empty:
         st.info("No PTW data available in the current files.")
     else:
@@ -658,6 +656,8 @@ with tab3:
 
             st.divider()
             st.subheader("⚠️ Repeat PTW Feeders Detail View")
+            st.markdown("Identifies specific feeders that had a Permit to Work (PTW) taken against them **two or more times** in separate requests over the selected timeframe.")
+
             if not repeat_feeders.empty:
                 st.dataframe(repeat_feeders.style.set_table_styles(HEADER_STYLES), width="stretch", hide_index=True)
             else:
