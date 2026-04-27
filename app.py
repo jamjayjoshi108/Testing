@@ -84,6 +84,7 @@ def load_data():
         df_outages = pd.read_csv(
             OUTAGES_URL,
             usecols=OUTAGES_COLS,
+            low_memory=False,
             dtype={
                 "outage_id":        "str",
                 "zone_name":        "category",
@@ -648,12 +649,37 @@ with tab3:
                 repeat_feeders = pd.concat([repeat_feeders, pd.DataFrame([gt_dict])], ignore_index=True)
 
             kpi1, kpi2 = st.columns(2)
-            with kpi1:
-                st.markdown(f'<div class="kpi-card"><div><div class="kpi-title">Total Active PTW Requests</div><div class="kpi-value">{filtered_ptw["ptw_id"].nunique()}</div></div><div class="kpi-subtext"><span class="status-badge">Selected Timeframe</span></div></div>', unsafe_allow_html=True)
-            with kpi2:
-                multi_count = len(repeat_feeders) - 1 if not repeat_feeders.empty else 0
-                st.markdown(f'<div class="kpi-card"><div><div class="kpi-title">Feeders with Multiple PTWs</div><div class="kpi-value">{multi_count}</div></div><div class="kpi-subtext"><span class="status-badge" style="background-color: #D32F2F;">🔴 Needs Review</span></div></div>', unsafe_allow_html=True)
+with kpi1:
+    # Count only non-closed, non-expired PTWs in the selected range
+    truly_active = filtered_ptw[
+        ~filtered_ptw['current_status'].astype(str).str.upper().isin(
+            ['CLOSED', 'COMPLETED', 'EXPIRED', 'REJECTED', 'CANCELLED', 'CANCELLATION']
+        )
+    ]["ptw_id"].nunique()
 
+    total_ptws = filtered_ptw["ptw_id"].nunique()  # all non-cancelled
+
+    st.markdown(
+        f'<div class="kpi-card"><div>'
+        f'<div class="kpi-title">Total PTW Requests</div>'
+        f'<div class="kpi-value">{total_ptws}</div>'
+        f'</div><div class="kpi-subtext">'
+        f'<span class="status-badge">🟢 Active: {truly_active}</span>'
+        f'<span class="status-badge">⚫ Closed: {total_ptws - truly_active}</span>'
+        f'</div></div>',
+        unsafe_allow_html=True
+    )
+with kpi2:
+    multi_count = len(repeat_feeders) - 1 if not repeat_feeders.empty else 0
+    st.markdown(
+        f'<div class="kpi-card"><div>'
+        f'<div class="kpi-title">Feeders with Multiple PTWs</div>'
+        f'<div class="kpi-value">{multi_count}</div>'
+        f'</div><div class="kpi-subtext">'
+        f'<span class="status-badge" style="background-color: #D32F2F;">🔴 Needs Review</span>'
+        f'</div></div>',
+        unsafe_allow_html=True
+    )
             st.divider()
             st.subheader("⚠️ Repeat PTW Feeders Detail View")
             st.markdown("Identifies specific feeders that had a Permit to Work (PTW) taken against them **two or more times** in separate requests over the selected timeframe.")
