@@ -12,118 +12,135 @@ st.set_page_config(
     layout="wide",
 )
 
-# ── Particle Animation (injected as fixed full-page background) ───────────────
-st.markdown("""
+# ── TRUE FULL-PAGE Particle Background via iframe breakout ────────────────────
+components.html("""
+<!DOCTYPE html>
+<html>
+<head>
 <style>
-    #particles-canvas {
-        position: fixed;
-        top: 0; left: 0;
-        width: 100vw; height: 100vh;
-        z-index: 0;
-        pointer-events: none;
-    }
+  * { margin: 0; padding: 0; }
+  body { overflow: hidden; background: transparent; }
+  canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    display: block;
+  }
 </style>
-<canvas id="particles-canvas"></canvas>
+</head>
+<body>
+<canvas id="c"></canvas>
 <script>
-(function() {
-    const canvas = document.getElementById('particles-canvas');
-    const ctx = canvas.getContext('2d');
+  // Break out of iframe and inject canvas into the parent (Streamlit) page
+  const parentDoc = window.parent.document;
 
-    let W = canvas.width  = window.innerWidth;
-    let H = canvas.height = window.innerHeight;
+  // Remove any previously injected canvas to avoid duplicates
+  const old = parentDoc.getElementById('pspcl-particles');
+  if (old) old.remove();
 
-    const PARTICLE_COUNT = 90;
-    const MAX_DIST       = 150;
-    const SPEED          = 0.6;
-    const DOT_RADIUS     = 2.5;
-    const DOT_COLOR      = '0, 102, 204';
-    const LINE_COLOR     = '0, 102, 204';
+  const canvas = parentDoc.createElement('canvas');
+  canvas.id = 'pspcl-particles';
+  canvas.style.cssText = `
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+  `;
+  parentDoc.body.appendChild(canvas);
 
-    let mouse = { x: null, y: null };
+  const ctx = canvas.getContext('2d');
 
-    window.addEventListener('mousemove', e => {
-        mouse.x = e.clientX;
-        mouse.y = e.clientY;
-    });
-    window.addEventListener('mouseleave', () => {
-        mouse.x = null;
-        mouse.y = null;
-    });
-    window.addEventListener('resize', () => {
-        W = canvas.width  = window.innerWidth;
-        H = canvas.height = window.innerHeight;
-    });
+  function resize() {
+    canvas.width  = window.parent.innerWidth;
+    canvas.height = window.parent.innerHeight;
+  }
+  resize();
+  window.parent.addEventListener('resize', resize);
 
-    class Particle {
-        constructor() { this.reset(true); }
-        reset(init) {
-            this.x  = Math.random() * W;
-            this.y  = Math.random() * H;
-            this.vx = (Math.random() - 0.5) * SPEED;
-            this.vy = (Math.random() - 0.5) * SPEED;
-            this.r  = DOT_RADIUS;
-        }
-        update() {
-            this.x += this.vx;
-            this.y += this.vy;
-            if (this.x < 0 || this.x > W) this.vx *= -1;
-            if (this.y < 0 || this.y > H) this.vy *= -1;
-        }
-        draw() {
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(${DOT_COLOR}, 0.75)`;
-            ctx.fill();
-        }
+  const PARTICLE_COUNT = 90;
+  const MAX_DIST       = 150;
+  const SPEED          = 0.55;
+  const DOT_COLOR      = '0, 102, 204';
+
+  let mouse = { x: null, y: null };
+
+  parentDoc.addEventListener('mousemove', e => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+  });
+  parentDoc.addEventListener('mouseleave', () => {
+    mouse.x = null;
+    mouse.y = null;
+  });
+
+  class Particle {
+    constructor() {
+      this.x  = Math.random() * canvas.width;
+      this.y  = Math.random() * canvas.height;
+      this.vx = (Math.random() - 0.5) * SPEED;
+      this.vy = (Math.random() - 0.5) * SPEED;
     }
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+      if (this.x < 0 || this.x > canvas.width)  this.vx *= -1;
+      if (this.y < 0 || this.y > canvas.height)  this.vy *= -1;
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${DOT_COLOR}, 0.7)`;
+      ctx.fill();
+    }
+  }
 
-    const particles = Array.from({ length: PARTICLE_COUNT }, () => new Particle());
+  const particles = Array.from({ length: PARTICLE_COUNT }, () => new Particle());
 
-    function connectParticles() {
-        for (let i = 0; i < particles.length; i++) {
-            for (let j = i + 1; j < particles.length; j++) {
-                const dx = particles[i].x - particles[j].x;
-                const dy = particles[i].y - particles[j].y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < MAX_DIST) {
-                    const alpha = 1 - dist / MAX_DIST;
-                    ctx.beginPath();
-                    ctx.moveTo(particles[i].x, particles[i].y);
-                    ctx.lineTo(particles[j].x, particles[j].y);
-                    ctx.strokeStyle = `rgba(${LINE_COLOR}, ${alpha * 0.35})`;
-                    ctx.lineWidth = 1;
-                    ctx.stroke();
-                }
-            }
-            // connect to mouse
-            if (mouse.x !== null) {
-                const dx = particles[i].x - mouse.x;
-                const dy = particles[i].y - mouse.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < MAX_DIST * 1.5) {
-                    const alpha = 1 - dist / (MAX_DIST * 1.5);
-                    ctx.beginPath();
-                    ctx.moveTo(particles[i].x, particles[i].y);
-                    ctx.lineTo(mouse.x, mouse.y);
-                    ctx.strokeStyle = `rgba(${LINE_COLOR}, ${alpha * 0.55})`;
-                    ctx.lineWidth = 1;
-                    ctx.stroke();
-                }
-            }
+  function connectParticles() {
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx   = particles[i].x - particles[j].x;
+        const dy   = particles[i].y - particles[j].y;
+        const dist = Math.hypot(dx, dy);
+        if (dist < MAX_DIST) {
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = `rgba(${DOT_COLOR}, ${(1 - dist / MAX_DIST) * 0.3})`;
+          ctx.lineWidth = 1;
+          ctx.stroke();
         }
+      }
+      if (mouse.x !== null) {
+        const dx   = particles[i].x - mouse.x;
+        const dy   = particles[i].y - mouse.y;
+        const dist = Math.hypot(dx, dy);
+        const R    = MAX_DIST * 1.6;
+        if (dist < R) {
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(mouse.x, mouse.y);
+          ctx.strokeStyle = `rgba(${DOT_COLOR}, ${(1 - dist / R) * 0.55})`;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+      }
     }
+  }
 
-    function animate() {
-        ctx.clearRect(0, 0, W, H);
-        particles.forEach(p => { p.update(); p.draw(); });
-        connectParticles();
-        requestAnimationFrame(animate);
-    }
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => { p.update(); p.draw(); });
+    connectParticles();
+    requestAnimationFrame(animate);
+  }
 
-    animate();
-})();
+  animate();
 </script>
-""", unsafe_allow_html=True)
+</body>
+</html>
+""", height=0)  # height=0 so it takes no visible space
 
 st.markdown("""
 <style>
@@ -141,7 +158,7 @@ st.markdown("""
         min-height: 100vh;
     }
 
-    /* Make sure all Streamlit content sits above the canvas */
+    /* ensure all content is above the particle canvas */
     .stApp > * { position: relative; z-index: 1; }
     .block-container { position: relative; z-index: 1; }
 
@@ -213,21 +230,15 @@ st.markdown("""
 
     /* ── Status dots ── */
     .status-dot-green {
-        display: inline-block;
-        width: 8px; height: 8px;
-        background: #00cc66;
-        border-radius: 50%;
-        position: absolute;
-        top: 14px; right: 14px;
+        display: inline-block; width: 8px; height: 8px;
+        background: #00cc66; border-radius: 50%;
+        position: absolute; top: 14px; right: 14px;
         animation: pulseGreen 2s infinite;
     }
     .status-dot-red {
-        display: inline-block;
-        width: 8px; height: 8px;
-        background: #ff3b3b;
-        border-radius: 50%;
-        position: absolute;
-        top: 14px; right: 14px;
+        display: inline-block; width: 8px; height: 8px;
+        background: #ff3b3b; border-radius: 50%;
+        position: absolute; top: 14px; right: 14px;
         animation: pulseRed 2s infinite;
     }
     @keyframes pulseGreen {
@@ -241,15 +252,12 @@ st.markdown("""
         100% { box-shadow: 0 0 0 0 rgba(255,59,59,0); }
     }
 
-    /* ── Divider ── */
     .divider {
         height: 1.5px;
         background: linear-gradient(90deg, transparent, rgba(0,102,204,0.3), transparent);
         margin: clamp(4px, 0.6vh, 8px) 60px clamp(6px, 1vh, 14px);
         animation: fadeSlideDown 0.9s ease both;
     }
-
-    /* ── Section label ── */
     .section-label {
         color: #8a9ab5;
         font-size: clamp(0.58rem, 0.85vw, 0.7rem);
@@ -344,10 +352,7 @@ st.markdown("""
         font-weight: 700;
         transition: all 0.3s ease;
     }
-    .module-card:hover .card-arrow {
-        color: #0066cc;
-        transform: translateX(4px);
-    }
+    .module-card:hover .card-arrow { color: #0066cc; transform: translateX(4px); }
 
     [data-testid="column"] { padding: 0 clamp(4px, 0.5vw, 10px) !important; }
 
@@ -384,13 +389,13 @@ st.markdown('<div class="section-label">Operational Modules</div>', unsafe_allow
 
 # ── Modules ───────────────────────────────────────────────────────────────────
 modules = [
-    {"icon": "📱", "title": "PTW App",                     "page": "ptw",                 "status": True},
-    {"icon": "🚨", "title": "Outage Monitoring",            "page": "outage_mon",          "status": True},
-    {"icon": "💡", "title": "Outage Reduction Plan (ORP)", "page": "orp",                 "status": True},
-    {"icon": "🛡️", "title": "RDSS",                        "page": "rdss",                "status": False},
-    {"icon": "📟", "title": "Smart Meter",                  "page": "smart_meter",         "status": False},
-    {"icon": "🔌", "title": "New Connections",              "page": "new_conn",            "status": False},
-    {"icon": "🤕", "title": "Consumer Complaints",          "page": "consumer_complaints", "status": False},
+    {"icon": "📱", "title": "PTW App",                      "page": "ptw",                 "status": True},
+    {"icon": "🚨", "title": "Outage Monitoring",             "page": "outage_mon",          "status": True},
+    {"icon": "💡", "title": "Outage Reduction Plan (ORP)",  "page": "orp",                 "status": True},
+    {"icon": "🛡️", "title": "RDSS",                         "page": "rdss",                "status": False},
+    {"icon": "📟", "title": "Smart Meter",                   "page": "smart_meter",         "status": False},
+    {"icon": "🔌", "title": "New Connections",               "page": "new_conn",            "status": False},
+    {"icon": "🤕", "title": "Consumer Complaints",           "page": "consumer_complaints", "status": False},
 ]
 
 cols1 = st.columns(4, gap="medium")
