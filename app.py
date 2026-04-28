@@ -70,11 +70,12 @@ PTW_URL     = "https://pspcl-dashboard-data.s3.ap-south-1.amazonaws.com/ptw_requ
 
 OUTAGES_COLS = [
     "outage_id", "zone_name", "circle_name", "feeder_name",
-    "outage_type", "outage_status", "start_time", "end_time",
+    "outage_type", "outage_status", "start_time", "supply_restored_time",
     "duration_minutes", "created_time"
 ]
 PTW_COLS = [
-    "ptw_id", "circle_name", "feeders", "current_status", "creation_date"
+    "ptw_id", "circle_name", "feeders", "current_status",
+    "creation_date", "start_time", "end_time"
 ]
 
 # ─────────────────────────────────────────────────────────────
@@ -96,7 +97,7 @@ def load_data():
                 "outage_status":    "category",
                 "duration_minutes": "float32",
             },
-            parse_dates=["start_time", "end_time", "created_time"]
+            parse_dates=["start_time", "supply_restored_time", "created_time"]  # ← end_time → supply_restored_time
         )
         df_ptw = pd.read_csv(
             PTW_URL,
@@ -107,7 +108,7 @@ def load_data():
                 "circle_name":    "category",
                 "current_status": "category",
             },
-            parse_dates=["creation_date"]
+            parse_dates=["creation_date", "start_time", "end_time"]  # ← added start_time + end_time
         )
     return df_outages, df_ptw
 
@@ -120,13 +121,39 @@ def clean_outage_data(df):
     if df.empty:
         return df
     df = df.copy()
+
     if 'outage_status' in df.columns:
         df = df[~df['outage_status'].astype(str).str.contains('Cancel', na=False, case=False)]
         df['status_calc'] = df['outage_status'].apply(
             lambda x: 'Active' if str(x).strip().upper() in ['OPEN', 'ACTIVE'] else 'Closed'
         )
-    if 'duration_minutes' in df.columns:
+
+    # ── Recalculate duration using start_time → supply_restored_time ──
+    if 'start_time' in df.columns and 'supply_restored_time' in df.columns:
+        df['start_time']            = pd.to_datetime(df['start_time'],            errors='coerce')
+        df['supply_restored_time']  = pd.to_datetime(df['supply_restored_time'],  errors='coerce')
+
+        # Where supply_restored_time is missing → outage is still ongoing → use now as end time
+        effective_end = df['supply_restored_time'].fillna(datetime.now(IST).replace(tzinfo=None))
+
+        df['duration_minutes'] = (
+            (effective_end - df['start_time'])
+            .dt.total_seconds()
+            .div(60)
+            .clip(lower=0)          # no negative durations
+            .round(2)
+        )
+
+        # Flag ongoing outages explicitly
+        df['is_ongoing'] = df['supply_restored_time'].isna()
+
+    elif 'duration_minutes' in df.columns:
+        # Fallback if supply_restored_time column doesn't exist
         df['duration_minutes'] = pd.to_numeric(df['duration_minutes'], errors='coerce').fillna(0)
+        df['is_ongoing'] = False
+
+    # Duration bucket
+    if 'duration_minutes' in df.columns:
         def assign_bucket(mins):
             if mins < 0: return "Active/Unknown"
             hrs = mins / 60
@@ -135,8 +162,10 @@ def clean_outage_data(df):
             elif hrs <= 8: return "4-8 Hrs"
             else:          return "Above 8 Hrs"
         df['duration_bucket'] = df['duration_minutes'].apply(assign_bucket)
+
     if 'start_time' in df.columns:
         df['outage_date'] = pd.to_datetime(df['start_time'], errors='coerce').dt.date
+
     return df
 
 df_master     = clean_outage_data(df_outages_raw)
@@ -537,17 +566,24 @@ with tab1:
 
                     def prep_feeder_df(df_sub):
                         if df_sub.empty:
-                            return pd.DataFrame(columns=['Outage Date', 'Feeder', 'Diff in Hours', 'Status', 'Duration Bucket'])
-                        res = df_sub[df_sub['circle_name'] == selected_circle][[
-                            'outage_date', 'feeder_name', 'duration_minutes', 'status_calc', 'duration_bucket'
-                        ]].rename(columns={
-                            'outage_date':      'Outage Date',
-                            'feeder_name':      'Feeder',
-                            'duration_minutes': '_mins',
-                            'status_calc':      'Status',
-                            'duration_bucket':  'Duration Bucket'
+                            return pd.DataFrame(columns=['Outage Date', 'Feeder', 'Start Time', 'End Time', 'Diff in Hours', 'Ongoing?', 'Status', 'Duration Bucket'])
+                        
+                        cols = ['outage_date', 'feeder_name', 'start_time', 'supply_restored_time',
+                                'duration_minutes', 'is_ongoing', 'status_calc', 'duration_bucket']
+                        cols = [c for c in cols if c in df_sub.columns]  # only include what exists
+                        
+                        res = df_sub[df_sub['circle_name'] == selected_circle][cols].rename(columns={
+                            'outage_date':           'Outage Date',
+                            'feeder_name':           'Feeder',
+                            'start_time':            'Start Time',
+                            'supply_restored_time':  'End Time',
+                            'duration_minutes':      '_mins',
+                            'is_ongoing':            'Ongoing?',
+                            'status_calc':           'Status',
+                            'duration_bucket':       'Duration Bucket'
                         }).copy()
                         res['Diff in Hours'] = (res['_mins'] / 60).round(2)
+                        res['End Time']      = res['End Time'].apply(lambda x: 'Ongoing 🔴' if pd.isna(x) else str(x))
                         return res.drop(columns=['_mins'])
 
                     c_left, c_mid, c_right = st.columns(3)
