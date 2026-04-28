@@ -427,7 +427,7 @@ def render_date_selector(tab_key):
 # ─────────────────────────────────────────────────────────────
 # MAIN DASHBOARD
 # ─────────────────────────────────────────────────────────────
-st.title("⚡ Power Outage Monitoring Dashboard")
+st.title("⚡ Power Outage Monitoring Dashboard ⚡")
 tab1, tab2, tab3 = st.tabs(["📊 Dashboard", "📈 YoY Comparison", "🛠️ PTW Frequency"])
 
 # ==========================================
