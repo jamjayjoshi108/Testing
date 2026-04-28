@@ -165,31 +165,32 @@ try:
 
     # ── Color function ────────────────────────────────────────────────────────
     def get_row_classes(row_vals):
-    """Rank values within a row: highest=green, lowest=red, middle=yellow"""
-    parsed = []
-    for v in row_vals:
-        try:
-            parsed.append(float(str(v).replace('%', '').strip()))
-        except:
-            parsed.append(None)
-
-    valid = [v for v in parsed if v is not None]
-    if not valid:
-        return [""] * len(row_vals)
-
-    max_val = max(valid)
-    min_val = min(valid)
-
-    classes = []
-    for v in parsed:
-        if v is None:
-            classes.append("")
-        elif v == max_val:
-            classes.append("cell-green")
-        elif v == min_val:
-            classes.append("cell-red")
-        else:
-            classes.append("cell-yellow")
+        
+        """Rank values within a row: highest=green, lowest=red, middle=yellow"""
+        parsed = []
+        for v in row_vals:
+            try:
+                parsed.append(float(str(v).replace('%', '').strip()))
+            except:
+                parsed.append(None)
+    
+        valid = [v for v in parsed if v is not None]
+        if not valid:
+            return [""] * len(row_vals)
+    
+        max_val = max(valid)
+        min_val = min(valid)
+    
+        classes = []
+        for v in parsed:
+            if v is None:
+                classes.append("")
+            elif v == max_val:
+                classes.append("cell-green")
+            elif v == min_val:
+                classes.append("cell-red")
+            else:
+                classes.append("cell-yellow")
     return classes
 
 
