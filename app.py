@@ -387,6 +387,16 @@ with tab1:
         filtered_tab1 = df_master[mask_t1].copy()
     else:
         filtered_tab1 = pd.DataFrame()
+    # ── TEMPORARY DEBUG: inspect specific feeder ─────────────────
+    debug_feeder = filtered_tab1[
+        (filtered_tab1['feeder_name'].astype(str).str.upper().str.contains('BORDER', na=False)) &
+        (filtered_tab1['circle_name'].astype(str).str.upper().str.contains('TARN TARAN', na=False)) &
+        (filtered_tab1['outage_type'] == 'Planned Outage')
+    ][['zone_name', 'circle_name', 'feeder_name', 'outage_type', 'start_time', 'end_time', 'duration_minutes', 'status_calc']]
+    
+    st.warning("🛠️ DEBUG — Border Feeder Planned Outage")
+    st.dataframe(debug_feeder, use_container_width=True)
+    # ── END: TEMPORARY DEBUG: inspect specific feeder ─────────────────
 
     if filtered_tab1.empty:
         st.info("No outage data found for the selected time period.")
@@ -395,16 +405,7 @@ with tab1:
         pc_df        = filtered_tab1[filtered_tab1['outage_type'] == 'Power Off By PC']
         unplanned_df = filtered_tab1[filtered_tab1['outage_type'] == 'Unplanned Outage']
 
-# ── TEMPORARY DEBUG: inspect specific feeder ─────────────────
-debug_feeder = filtered_tab1[
-    (filtered_tab1['feeder_name'].astype(str).str.upper().str.contains('BORDER', na=False)) &
-    (filtered_tab1['circle_name'].astype(str).str.upper().str.contains('TARN TARAN', na=False)) &
-    (filtered_tab1['outage_type'] == 'Planned Outage')
-][['zone_name', 'circle_name', 'feeder_name', 'outage_type', 'start_time', 'end_time', 'duration_minutes', 'status_calc']]
 
-st.warning("🛠️ DEBUG — Border Feeder Planned Outage")
-st.dataframe(debug_feeder, use_container_width=True)
-# ── END: TEMPORARY DEBUG: inspect specific feeder ─────────────────
 
         # --- KPI WIDGETS ---
         kpi1, kpi2, kpi3 = st.columns(3)
