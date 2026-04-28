@@ -29,7 +29,7 @@ st.markdown("""
     }
 
     .block-container {
-        padding-top: clamp(10px, 2.5vh, 36px) !important;
+        padding-top: clamp(12px, 2vh, 28px) !important;
         padding-bottom: clamp(10px, 2vh, 24px) !important;
         padding-left: clamp(16px, 4vw, 64px) !important;
         padding-right: clamp(16px, 4vw, 64px) !important;
@@ -43,7 +43,7 @@ st.markdown("""
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: clamp(10px, 1.8vh, 24px) clamp(16px, 2.5vw, 32px);
+        padding: clamp(14px, 2.2vh, 28px) clamp(20px, 3vw, 40px);
         background: #ffffff;
         border-radius: 16px;
         box-shadow: 0 2px 16px rgba(0,0,0,0.06);
@@ -54,28 +54,28 @@ st.markdown("""
     .header-left {
         display: flex;
         align-items: center;
-        gap: clamp(10px, 1.5vw, 20px);
+        gap: clamp(14px, 2vw, 28px);
     }
     .header-logo {
-        width: clamp(48px, 6vw, 72px);
+        width: clamp(70px, 9vw, 110px);
         height: auto;
         filter: drop-shadow(0 2px 6px rgba(0,0,0,0.1));
     }
     .header-dept-name {
         color: #0066cc;
-        font-size: clamp(0.7rem, 1.1vw, 0.92rem);
-        font-weight: 700;
+        font-size: clamp(0.9rem, 1.5vw, 1.2rem);
+        font-weight: 800;
         letter-spacing: 1.5px;
         text-transform: uppercase;
     }
     .header-dept-sub {
         color: #8a9ab5;
-        font-size: clamp(0.6rem, 0.8vw, 0.72rem);
+        font-size: clamp(0.72rem, 1vw, 0.88rem);
         font-weight: 500;
-        margin-top: 2px;
+        margin-top: 4px;
     }
     .header-right h1 {
-        font-size: clamp(1.4rem, 3vw, 2.4rem);
+        font-size: clamp(1.6rem, 3.2vw, 2.8rem);
         font-weight: 800;
         color: #0d1f3c;
         margin: 0;
@@ -102,7 +102,6 @@ st.markdown("""
         border-radius: 50%;
         position: absolute;
         top: 14px; right: 14px;
-        box-shadow: 0 0 0 0 rgba(0,204,102,0.4);
         animation: pulseGreen 2s infinite;
     }
     .status-dot-red {
@@ -112,7 +111,6 @@ st.markdown("""
         border-radius: 50%;
         position: absolute;
         top: 14px; right: 14px;
-        box-shadow: 0 0 0 0 rgba(255,59,59,0.4);
         animation: pulseRed 2s infinite;
     }
     @keyframes pulseGreen {
@@ -142,22 +140,22 @@ st.markdown("""
         letter-spacing: 3px;
         text-transform: uppercase;
         text-align: center;
-        margin-bottom: clamp(10px, 1.8vh, 22px);
+        margin-bottom: clamp(10px, 1.5vh, 18px);
         animation: fadeSlideDown 1s ease both;
     }
 
-    /* ── Cards ── */
+    /* ── Cards — tall to fill screen ── */
     .module-card {
         background: #ffffff;
         border: 1.5px solid rgba(0, 102, 204, 0.1);
         border-radius: 18px;
-        padding: clamp(20px, 3.5vh, 48px) clamp(12px, 2vw, 24px);
+        padding: clamp(16px, 2.5vh, 36px) clamp(12px, 2vw, 24px);
         text-align: center;
         cursor: pointer;
         transition: all 0.32s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
         overflow: hidden;
-        min-height: clamp(130px, 20vh, 220px);
+        height: clamp(140px, 25vh, 260px);
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -171,7 +169,6 @@ st.markdown("""
         text-decoration: none !important;
         color: inherit !important;
     }
-
     .module-card::before {
         content: '';
         position: absolute;
@@ -184,7 +181,6 @@ st.markdown("""
         border-radius: 18px 18px 0 0;
     }
     .module-card:hover::before { transform: scaleX(1); }
-
     .module-card:hover {
         border-color: rgba(0, 102, 204, 0.3);
         transform: translateY(-6px);
@@ -206,8 +202,8 @@ st.markdown("""
     }
 
     .card-icon {
-        font-size: clamp(2rem, 3.5vw, 2.8rem);
-        margin-bottom: clamp(8px, 1.2vh, 16px);
+        font-size: clamp(2.2rem, 4vw, 3.2rem);
+        margin-bottom: clamp(10px, 1.5vh, 18px);
         transition: transform 0.3s ease;
         filter: drop-shadow(0 2px 6px rgba(0,102,204,0.15));
     }
@@ -215,7 +211,7 @@ st.markdown("""
 
     .card-title {
         color: #0d1f3c;
-        font-size: clamp(0.82rem, 1.3vw, 1rem);
+        font-size: clamp(0.85rem, 1.3vw, 1.05rem);
         font-weight: 700;
         letter-spacing: 0.1px;
         line-height: 1.4;
@@ -238,7 +234,6 @@ st.markdown("""
 
     [data-testid="column"] { padding: 0 clamp(4px, 0.5vw, 10px) !important; }
 
-    /* ── Footer ── */
     .footer {
         text-align: center;
         color: #b0bdd0;
@@ -254,7 +249,7 @@ st.markdown("""
 st.markdown("""
 <div class="header-bar">
     <div class="header-left">
-        <img src="https://raw.githubusercontent.com/jamjayjoshi108/Testing/main/gop logo.png"
+        <img src="https://raw.githubusercontent.com/jamjayjoshi108/Testing/main/logo.png"
              class="header-logo" alt="Govt of Punjab"/>
         <div>
             <div class="header-dept-name">Punjab Development Commission</div>
