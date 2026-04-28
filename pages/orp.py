@@ -191,7 +191,7 @@ try:
                 classes.append("cell-red")
             else:
                 classes.append("cell-yellow")
-    return classes
+        return classes
 
 
     # ── Render Section Header ─────────────────────────────────────────────────
