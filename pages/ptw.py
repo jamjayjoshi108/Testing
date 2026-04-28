@@ -81,11 +81,6 @@ def render_ptw_lm_dashboard():
     col_title, col_btn = st.columns([0.85, 0.15])
     with col_title:
         st.title("🛠️ PTW & LM-ALM Tracker")
-    with col_btn:
-        st.write("")
-        if st.button("⬅️ Home", use_container_width=True):
-            st.session_state.page = 'home'
-            st.rerun()
 
     # ── Date Range Selection ──────────────────────────────────────────────────
     today = pd.to_datetime("today").date()
