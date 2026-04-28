@@ -64,32 +64,32 @@ st.markdown("""
 # ── Back Button ──────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-    .back-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
+    div[data-testid="stButton"] > button[kind="secondary"] {
         background: #ffffff;
         border: 1.5px solid rgba(0,102,204,0.2);
         color: #0066cc;
         font-size: 0.82rem;
         font-weight: 600;
-        padding: 8px 18px;
+        padding: 8px 20px;
         border-radius: 10px;
-        text-decoration: none;
-        margin: 12px 0 18px 0;
         box-shadow: 0 2px 8px rgba(0,102,204,0.08);
         transition: all 0.2s ease;
         font-family: 'Inter', sans-serif;
+        margin-bottom: 16px;
     }
-    .back-btn:hover {
+    div[data-testid="stButton"] > button[kind="secondary"]:hover {
         background: #0066cc;
         color: #ffffff;
-        transform: translateX(-3px);
+        border-color: #0066cc;
         box-shadow: 0 4px 16px rgba(0,102,204,0.2);
     }
 </style>
-<a href="/" target="_self" class="back-btn">← Back to Command Center</a>
 """, unsafe_allow_html=True)
+
+if st.button("← Back to Command Center"):
+    st.switch_page("main.py")
+
+
 # ─────────────────────────────────────────────────────────────
 # IST TIMEZONE
 # ─────────────────────────────────────────────────────────────
