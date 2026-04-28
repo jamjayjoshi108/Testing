@@ -164,14 +164,34 @@ try:
     data_rows = df.iloc[4:8, 1:7].values  # rows 5–8, columns B–G
 
     # ── Color function ────────────────────────────────────────────────────────
-    def get_cell_class(val):
+    def get_row_classes(row_vals):
+    """Rank values within a row: highest=green, lowest=red, middle=yellow"""
+    parsed = []
+    for v in row_vals:
         try:
-            v = float(str(val).replace('%','').strip())
-            if v >= 95:   return "cell-green"
-            elif v >= 80: return "cell-yellow"
-            else:         return "cell-red"
+            parsed.append(float(str(v).replace('%', '').strip()))
         except:
-            return ""
+            parsed.append(None)
+
+    valid = [v for v in parsed if v is not None]
+    if not valid:
+        return [""] * len(row_vals)
+
+    max_val = max(valid)
+    min_val = min(valid)
+
+    classes = []
+    for v in parsed:
+        if v is None:
+            classes.append("")
+        elif v == max_val:
+            classes.append("cell-green")
+        elif v == min_val:
+            classes.append("cell-red")
+        else:
+            classes.append("cell-yellow")
+    return classes
+
 
     # ── Render Section Header ─────────────────────────────────────────────────
     st.markdown(f'<div class="section-header">%age Progress in ORP &nbsp;·&nbsp; {date_val}</div>', unsafe_allow_html=True)
@@ -181,15 +201,18 @@ try:
 
     tbody = ""
     for row_idx, metric in enumerate(metrics):
+        row_vals = [data_rows[row_idx][col_idx] for col_idx in range(6)]
+        row_classes = get_row_classes(row_vals)
+    
         row_html = f"<tr><td class='label-td'>{metric}</td>"
         for col_idx in range(6):
-            val = data_rows[row_idx][col_idx]
-            display = str(val).strip() if str(val).strip() not in ["nan",""] else "—"
-            css = get_cell_class(display)
+            val = row_vals[col_idx]
+            display = str(val).strip() if str(val).strip() not in ["nan", ""] else "—"
+            css = row_classes[col_idx]
             row_html += f"<td class='{css}'>{display}</td>"
         row_html += "</tr>"
         tbody += row_html
-
+    
     st.markdown(f"""
     <table class="orp-table">
         <thead>{thead}</thead>
