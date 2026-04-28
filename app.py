@@ -38,6 +38,16 @@ st.markdown("""
         box-shadow: 0 0 0 0 rgba(0,204,102,0.4);
         animation: pulseGreen 2s infinite;
     }
+    /* Remove underline from card titles */
+    .card-title {
+        text-decoration: none !important;
+    }
+    
+    /* Remove default anchor underline everywhere in cards */
+    .module-card, .module-card:hover, .module-card:visited, .module-card:active {
+        text-decoration: none !important;
+        color: inherit !important;
+    }
     .status-dot-red {
         display: inline-block;
         width: 8px; height: 8px;
@@ -71,9 +81,9 @@ st.markdown("""
 
     /* ── Hero ── */
     .hero {
-        text-align: center;
-        padding: clamp(8px, 1.5vh, 20px) 20px clamp(4px, 0.8vh, 12px);
-        animation: fadeSlideDown 0.7s ease both;
+    text-align: center;
+    padding: clamp(8px, 1.5vh, 16px) 20px clamp(2px, 0.4vh, 6px);
+    animation: fadeSlideDown 0.7s ease both;
     }
     @keyframes fadeSlideDown {
         from { opacity: 0; transform: translateY(-24px); }
@@ -114,11 +124,16 @@ st.markdown("""
     }
 
     /* ── Divider ── */
-    .divider {
-        height: 1.5px;
-        background: linear-gradient(90deg, transparent, rgba(0,102,204,0.3), transparent);
-        margin: clamp(6px, 1vh, 14px) 60px clamp(8px, 1.5vh, 20px);
-        animation: fadeSlideDown 0.9s ease both;
+    # .divider {
+    #     height: 1.5px;
+    #     background: linear-gradient(90deg, transparent, rgba(0,102,204,0.3), transparent);
+    #     margin: clamp(6px, 1vh, 14px) 60px clamp(8px, 1.5vh, 20px);
+    #     animation: fadeSlideDown 0.9s ease both;
+    # }
+    .hero {
+    text-align: center;
+    padding: clamp(8px, 1.5vh, 16px) 20px clamp(2px, 0.4vh, 6px);
+    animation: fadeSlideDown 0.7s ease both;
     }
 
     /* ── Section label ── */
