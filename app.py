@@ -254,7 +254,7 @@ modules = [
     {"icon": "📟", "title": "Smart Meter",                  "page": "smart_meter",     "status": False},
     {"icon": "🔌", "title": "New Connections",              "page": "new_conn",    "status": False},
     {"icon": "🚨", "title": "Outage Monitoring",            "page": "outage_mon",    "status": True},
-    {"icon": "🤕", "title": "Consumer Complaints",            "page": "consumer_complaints",    "status": False},
+    {"icon": "🤕", "title": "Consumer Complaints",            "page": "consumer_complaints",    "status": False}
 ]
 
 cols1 = st.columns(3, gap="medium")
