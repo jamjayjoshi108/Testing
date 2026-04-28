@@ -30,7 +30,8 @@ st.markdown("""
         padding-right: clamp(16px, 4vw, 64px) !important;
         max-width: 100% !important;
     }
-
+    [data-testid="stSidebar"] { display: none !important; }
+    [   data-testid="collapsedControl"] { display: none !important; }
     /* ── Hero ── */
     .hero {
         text-align: center;
