@@ -260,8 +260,8 @@ loader.markdown("""
     }
 </style>
 <div class="loader-overlay">
-    <div class="loader-title">⚡ PTW & LM-ALM Tracker</div>
-    <div class="loader-sub">Fetching latest data from PSPCL database…</div>
+    <div class="loader-title">📱 PTW Tracker</div>
+    <div class="loader-sub">Fetching latest data from S3 bucket</div>
     <div class="loader-bar-track">
         <div class="loader-bar-fill"></div>
     </div>
