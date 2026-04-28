@@ -295,7 +295,7 @@ grid_adoption_rate = total_grids_active / SYSTEM_TOTAL_GRIDS
 avg_duration       = df['duration_hrs'].dropna().mean()
 avg_dur_str        = f"{avg_duration:.1f} hrs" if not pd.isna(avg_duration) else "N/A"
 
-st.subheader(f"📊 Global Performance ({start_date.strftime('%d %b')} to {end_date.strftime('%d %b %Y')})")
+# st.subheader(f"📊 Global Performance ({start_date.strftime('%d %b')} to {end_date.strftime('%d %b %Y')})")
 
 kpi1, kpi2, kpi3 = st.columns(3)
 st.write("")
