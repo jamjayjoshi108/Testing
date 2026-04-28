@@ -257,7 +257,6 @@ for i, (col, mod) in enumerate(zip(all_cols, modules)):
         <div class="module-card" style="--accent:{mod['color']};">
             <div class="card-icon">{mod['icon']}</div>
             <div class="card-title">{mod['title']}</div>
-            <div class="card-desc">{mod['desc']}</div>
             <div class="card-arrow">→</div>
         </div>
         """, unsafe_allow_html=True)
