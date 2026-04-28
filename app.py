@@ -249,7 +249,7 @@ st.markdown("""
 st.markdown("""
 <div class="header-bar">
     <div class="header-left">
-        <img src="https://raw.githubusercontent.com/jamjayjoshi108/Testing/main/logo.png"
+        <img src="https://raw.githubusercontent.com/jamjayjoshi108/Testing/main/gop logo.png"
              class="header-logo" alt="Govt of Punjab"/>
         <div>
             <div class="header-dept-name">Punjab Development Commission</div>
