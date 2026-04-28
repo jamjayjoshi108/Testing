@@ -165,15 +165,17 @@ def handle_period_change(tab_key):
 def render_date_selector(tab_key):
     st.markdown("📅 **Select Time Period:**")
     if f"{tab_key}_start_date" not in st.session_state:
-        st.session_state[f"{tab_key}_start_date"] = now_ist.date().replace(day=1)
+        st.session_state[f"{tab_key}_start_date"] = now_ist.date()  
         st.session_state[f"{tab_key}_end_date"]   = now_ist.date()
 
-    period = st.radio(
-        "Select Time Period",
-        options=["Today", "Current Month", "Last Month", "Last 3 Months", "Last 6 Months", "Custom"],
-        horizontal=True, label_visibility="collapsed",
-        key=f"{tab_key}_radio", on_change=handle_period_change, args=(tab_key,)
-    )
+    if f"{tab_key}_radio" not in st.session_state:
+        st.session_state[f"{tab_key}_radio"] = "Today"
+        period = st.radio(
+            "Select Time Period",
+            options=["Today", "Current Month", "Last Month", "Last 3 Months", "Last 6 Months", "Custom"],
+            horizontal=True, label_visibility="collapsed",
+            key=f"{tab_key}_radio", on_change=handle_period_change, args=(tab_key,)
+        )
     col1, col2 = st.columns(2)
     with col1:
         start_date = st.date_input("From Date", format="DD/MM/YYYY", disabled=(period != "Custom"), key=f"{tab_key}_start_date")
