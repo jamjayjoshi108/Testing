@@ -88,7 +88,20 @@ now_ist = datetime.now(IST)
 # ─────────────────────────────────────────────────────────────
 # DATA LOADING
 # ─────────────────────────────────────────────────────────────
-@st.cache_data(ttl=300)
+# @st.cache_data(ttl=300)
+# def load_csv_data():
+#     df = pd.read_csv(S3_CSV_URL, low_memory=False, dtype={'ptw_id': 'str', 'permit_je': 'str', 'grid_code': 'str'})
+#     df['start_time']    = pd.to_datetime(df['start_time'],    errors='coerce')
+#     df['end_time']      = pd.to_datetime(df['end_time'],      errors='coerce')
+#     df['creation_date'] = pd.to_datetime(df['creation_date'], errors='coerce')
+#     df['duration_hrs']  = (df['end_time'] - df['start_time']).dt.total_seconds() / 3600
+#     df['zone_name']      = df['zone_name'].astype(str).str.replace(' Zone', '', case=False).str.strip().str.title()
+#     df['grid_ownership'] = df['grid_ownership'].astype(str).str.strip().str.upper()
+#     df['current_status'] = df['current_status'].astype(str).str.strip().str.title()
+#     df['grid_type']      = df['grid_type'].astype(str).str.strip().str.title()
+#     return df
+
+@st.cache_data(ttl=300, show_spinner=False)   # ← disabling the ugly default
 def load_csv_data():
     df = pd.read_csv(S3_CSV_URL, low_memory=False, dtype={'ptw_id': 'str', 'permit_je': 'str', 'grid_code': 'str'})
     df['start_time']    = pd.to_datetime(df['start_time'],    errors='coerce')
@@ -155,7 +168,64 @@ if st.button("← Back to Command Center"):
 # ─────────────────────────────────────────────────────────────
 st.title("📱 PTW Tracker")
 
+# full_df = load_csv_data()
+# ── Custom Loading Screen ─────────────────────────────────────────────────────
+st.markdown("""
+<style>
+    .loader-overlay {
+        position: fixed; inset: 0;
+        background: rgba(255,255,255,0.92);
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    .loader-title {
+        color: #004085;
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        font-family: 'Segoe UI', sans-serif;
+    }
+    .loader-sub {
+        color: #666;
+        font-size: 0.88rem;
+        margin-bottom: 1.8rem;
+        font-family: 'Segoe UI', sans-serif;
+    }
+    .loader-bar-track {
+        width: 320px;
+        height: 6px;
+        background: #dce8f7;
+        border-radius: 999px;
+        overflow: hidden;
+    }
+    .loader-bar-fill {
+        height: 100%;
+        width: 40%;
+        background: linear-gradient(90deg, #004481, #0066cc, #33aaff);
+        border-radius: 999px;
+        animation: slide 1.4s ease-in-out infinite;
+        background-size: 200% 100%;
+    }
+    @keyframes slide {
+        0%   { transform: translateX(-100%); }
+        100% { transform: translateX(350%);  }
+    }
+</style>
+<div class="loader-overlay">
+    <div class="loader-title">⚡ PTW & LM-ALM Tracker</div>
+    <div class="loader-sub">Fetching latest data from PSPCL database…</div>
+    <div class="loader-bar-track">
+        <div class="loader-bar-fill"></div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
 full_df = load_csv_data()
+
+st.empty()   # clears the overlay once data is loaded
 
 start_date, end_date = render_date_selector("ptw")
 st.divider()
