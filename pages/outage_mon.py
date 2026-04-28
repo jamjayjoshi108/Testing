@@ -87,7 +87,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 if st.button("← Back to Command Center"):
-    st.switch_page("main.py")
+    st.switch_page("app.py")
 
 
 # ─────────────────────────────────────────────────────────────
