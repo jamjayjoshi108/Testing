@@ -187,16 +187,6 @@ st.markdown("""
 <div class="hero">
     <div class="hero-badge">⚡ Live Operations</div>
     <h1>Utility Operations <span>Command Center</span></h1>
-    <p>Select an operational module below to access real-time dashboards and management tools.</p>
-</div>
-""", unsafe_allow_html=True)
-
-# ── Status Bar ─────────────────────────────────────────────────────────────────
-st.markdown("""
-<div class="status-bar">
-    <div class="status-item"><div class="status-dot"></div> All Systems Operational</div>
-    <div class="status-item">🕐 Last Updated: Just now</div>
-    <div class="status-item">📡 6 Modules Active</div>
 </div>
 """, unsafe_allow_html=True)
 
