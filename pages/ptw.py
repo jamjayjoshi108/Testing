@@ -5,82 +5,110 @@ import pandas as pd
 ZONES = ['Border', 'Central', 'North', 'South', 'East', 'West']
 ZONE_TOTALS = {
     'Border': {'Total JEs': 419, 'PSPCL_G': 148, 'PSTCL_G': 38},
-    'Central': {'Total JEs': 222, 'PSPCL_G': 92, 'PSTCL_G': 25},
-    'North': {'Total JEs': 273, 'PSPCL_G': 128, 'PSTCL_G': 34},
-    'South': {'Total JEs': 294, 'PSPCL_G': 219, 'PSTCL_G': 38},
-    'East': {'Total JEs': 134, 'PSPCL_G': 219, 'PSTCL_G': 38},
-    'West': {'Total JEs': 346, 'PSPCL_G': 256, 'PSTCL_G': 44}
+    'Central': {'Total JEs': 222, 'PSPCL_G': 92,  'PSTCL_G': 25},
+    'North':   {'Total JEs': 273, 'PSPCL_G': 128, 'PSTCL_G': 34},
+    'South':   {'Total JEs': 294, 'PSPCL_G': 219, 'PSTCL_G': 38},
+    'East':    {'Total JEs': 134, 'PSPCL_G': 219, 'PSTCL_G': 38},
+    'West':    {'Total JEs': 346, 'PSPCL_G': 256, 'PSTCL_G': 44},
 }
-SYSTEM_TOTAL_JES = 1688
-SYSTEM_TOTAL_GRIDS = 1022
+SYSTEM_TOTAL_JES    = 1688
+SYSTEM_TOTAL_GRIDS  = 1022
 
-# ── S3 CSV URL (public bucket) ────────────────────────────────────────────────
 S3_CSV_URL = "https://pspcl-dashboard-data.s3.ap-south-1.amazonaws.com/ptw_requests.csv"
 
-# ── CSV Format Expected ───────────────────────────────────────────────────────
-# ptw_id, zone_name, circle_name, division_name, employee_subdivision,
-# permit_no, permit_je, current_status, grid_code, grid_name, grid_type,
-# grid_ownership, pm_circle, om_division, creation_date, start_time, end_time, feeders
-#
-# Date/Time format expected:  YYYY-MM-DD HH:MM:SS  (or YYYY-MM-DD for dates)
 
-@st.cache_data(ttl=300)  # Auto-refresh every 5 minutes from S3
+@st.cache_data(ttl=300)
 def load_csv_data():
     df = pd.read_csv(S3_CSV_URL)
-
-    # Parse datetime columns
-    df['start_time'] = pd.to_datetime(df['start_time'], errors='coerce')
-    df['end_time']   = pd.to_datetime(df['end_time'],   errors='coerce')
+    df['start_time']    = pd.to_datetime(df['start_time'],    errors='coerce')
+    df['end_time']      = pd.to_datetime(df['end_time'],      errors='coerce')
     df['creation_date'] = pd.to_datetime(df['creation_date'], errors='coerce')
-
-    # Compute PTW duration in hours
-    df['duration_hrs'] = (df['end_time'] - df['start_time']).dt.total_seconds() / 3600
-
-    # Clean key columns
+    df['duration_hrs']  = (df['end_time'] - df['start_time']).dt.total_seconds() / 3600
     df['zone_name']      = df['zone_name'].astype(str).str.replace(' Zone', '', case=False).str.strip().str.title()
     df['grid_ownership'] = df['grid_ownership'].astype(str).str.strip().str.upper()
     df['current_status'] = df['current_status'].astype(str).str.strip().str.title()
     df['grid_type']      = df['grid_type'].astype(str).str.strip().str.title()
-
     return df
 
 
 def render_ptw_lm_dashboard():
 
-    # ── Back Button ───────────────────────────────────────────────────────────
+    # ── Global Styles ─────────────────────────────────────────────────────────
     st.markdown("""
     <style>
+        /* ── KPI Grid ── */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 1rem;
+            margin: 0.5rem 0 1.5rem 0;
+        }
         .kpi-card {
             background: linear-gradient(135deg, #004481 0%, #0066cc 100%);
-            border-radius: 6px;
-            padding: 1rem 0.8rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-            margin-bottom: 1rem;
-            min-width: 0;
+            border-radius: 10px;
+            padding: 1.1rem 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
         }
         .kpi-title {
             color: #FFC107;
             font-weight: 600;
-            font-size: 0.75rem;          /* slightly smaller label */
+            font-size: 0.72rem;
             text-transform: uppercase;
-            margin-bottom: 0.3rem;
-            line-height: 1.3;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.45rem;
+            line-height: 1.4;
         }
         .kpi-value {
             color: #FFFFFF;
             font-weight: 700;
-            font-size: 1.6rem;           /* reduced from 2.2rem */
-            line-height: 1.2;
-            white-space: nowrap;         /* prevent mid-number line breaks */
-            overflow: hidden;
-            text-overflow: ellipsis;
+            font-size: 1.85rem;
+            line-height: 1.1;
+            white-space: nowrap;
+        }
+
+        /* Tablet */
+        @media (max-width: 768px) {
+            .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+            .kpi-value { font-size: 1.45rem; }
+        }
+        /* Mobile */
+        @media (max-width: 480px) {
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+            .kpi-value { font-size: 1.25rem; }
+            .kpi-title { font-size: 0.65rem; }
+        }
+
+        /* ── Back Button ── */
+        div[data-testid="stButton"] > button[kind="secondary"] {
+            background: #ffffff;
+            border: 1.5px solid rgba(0,102,204,0.2);
+            color: #0066cc;
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 8px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,102,204,0.08);
+            transition: all 0.2s ease;
+            margin-bottom: 16px;
+        }
+        div[data-testid="stButton"] > button[kind="secondary"]:hover {
+            background: #0066cc;
+            color: #ffffff;
+            border-color: #0066cc;
+            box-shadow: 0 4px 16px rgba(0,102,204,0.2);
         }
     </style>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
+    # ── Header ────────────────────────────────────────────────────────────────
     col_title, col_btn = st.columns([0.85, 0.15])
     with col_title:
         st.title("🛠️ PTW & LM-ALM Tracker")
+    with col_btn:
+        st.write("")
+        if st.button("⬅️ Home", use_container_width=True):
+            st.session_state.page = 'home'
+            st.rerun()
 
     # ── Date Range Selection ──────────────────────────────────────────────────
     today = pd.to_datetime("today").date()
@@ -114,7 +142,7 @@ def render_ptw_lm_dashboard():
     with c1: start_date = st.date_input("From Date", key="ptw_start")
     with c2: end_date   = st.date_input("To Date",   key="ptw_end")
 
-    # ── Load & Filter Data ────────────────────────────────────────────────────
+    # ── Load & Filter ─────────────────────────────────────────────────────────
     full_df = load_csv_data()
     df = full_df[
         (full_df['start_time'].dt.date >= start_date) &
@@ -125,48 +153,55 @@ def render_ptw_lm_dashboard():
         st.warning(f"No data found for the selected period ({start_date} to {end_date}).")
         return
 
-    # ── KPI Section ───────────────────────────────────────────────────────────
+    # ── Compute KPIs ─────────────────────────────────────────────────────────
+    total_ptws         = df['ptw_id'].nunique()
     total_jes_active   = df['permit_je'].nunique()
     total_grids_active = df['grid_code'].nunique()
     je_adoption_rate   = total_jes_active / SYSTEM_TOTAL_JES
     grid_adoption_rate = total_grids_active / SYSTEM_TOTAL_GRIDS
-    total_ptws         = df['ptw_id'].nunique()
     avg_duration       = df['duration_hrs'].dropna().mean()
 
     st.write("---")
     st.subheader(f"📊 Global Performance ({start_date.strftime('%d %b')} to {end_date.strftime('%d %b %Y')})")
 
-    k1, k2, k3, k4, k5, k6 = st.columns(6)
-    kpis = [
-        (k1, "Total PTWs Issued",        f"{total_ptws:,}"),
-        (k2, "JEs Using PTW",            f"{total_jes_active}"),
-        (k3, "JE Adoption Rate",         f"{je_adoption_rate:.1%}"),
-        (k4, "Grids Using PTW",          f"{total_grids_active}"),
-        (k5, "Grid Adoption Rate",       f"{grid_adoption_rate:.1%}"),
-        (k6, "Avg PTW Duration (hrs)",   f"{avg_duration:.1f}" if not pd.isna(avg_duration) else "N/A"),
+    # ── Responsive KPI Cards (CSS Grid) ──────────────────────────────────────
+    kpi_data = [
+        ("📋 Total PTWs Issued",    f"{total_ptws:,}"),
+        ("👷 JEs Using PTW",        f"{total_jes_active:,}"),
+        ("📈 JE Adoption Rate",     f"{je_adoption_rate:.1%}"),
+        ("🏭 Grids Using PTW",      f"{total_grids_active:,}"),
+        ("📡 Grid Adoption Rate",   f"{grid_adoption_rate:.1%}"),
+        ("⏱️ Avg PTW Duration",     f"{avg_duration:.1f} hrs" if not pd.isna(avg_duration) else "N/A"),
     ]
-    for col, title, value in kpis:
-        with col:
-            st.markdown(
-                f'<div class="kpi-card"><div class="kpi-title">{title}</div>'
-                f'<div class="kpi-value">{value}</div></div>',
-                unsafe_allow_html=True
-            )
 
-    # ── PTW Status Breakdown ──────────────────────────────────────────────────
+    cards_html = "".join([
+        f'<div class="kpi-card">'
+        f'<div class="kpi-title">{title}</div>'
+        f'<div class="kpi-value">{value}</div>'
+        f'</div>'
+        for title, value in kpi_data
+    ])
+    st.markdown(f'<div class="kpi-grid">{cards_html}</div>', unsafe_allow_html=True)
+
+    # ── PTW Status Overview ───────────────────────────────────────────────────
     st.write("---")
     st.subheader("📋 PTW Status Overview")
 
     status_counts = df['current_status'].value_counts().reset_index()
     status_counts.columns = ['Status', 'Count']
-    status_counts['% Share'] = (status_counts['Count'] / status_counts['Count'].sum() * 100).map("{:.1f}%".format)
+    status_counts['% Share'] = (
+        status_counts['Count'] / status_counts['Count'].sum() * 100
+    ).map("{:.1f}%".format)
 
     s1, s2 = st.columns([0.4, 0.6])
     with s1:
         st.dataframe(status_counts, hide_index=True, use_container_width=True)
     with s2:
-        # Grid Type split
-        grid_type_counts = df.drop_duplicates('grid_code')[['grid_code', 'grid_type']].value_counts('grid_type').reset_index()
+        grid_type_counts = (
+            df.drop_duplicates('grid_code')[['grid_code', 'grid_type']]
+            .value_counts('grid_type')
+            .reset_index()
+        )
         grid_type_counts.columns = ['Grid Type', 'Unique Grids']
         st.markdown("**Grids by Type**")
         st.dataframe(grid_type_counts, hide_index=True, use_container_width=True)
@@ -181,34 +216,40 @@ def render_ptw_lm_dashboard():
     circle_df = (
         filtered.groupby(['zone_name', 'circle_name'])
         .agg(
-            PTWs_Issued   = ('ptw_id',      'nunique'),
-            JEs_Active    = ('permit_je',   'nunique'),
-            Grids_Covered = ('grid_code',   'nunique'),
-            Avg_Duration  = ('duration_hrs','mean'),
+            PTWs_Issued   = ('ptw_id',       'nunique'),
+            JEs_Active    = ('permit_je',    'nunique'),
+            Grids_Covered = ('grid_code',    'nunique'),
+            Avg_Duration  = ('duration_hrs', 'mean'),
         )
         .reset_index()
-        .rename(columns={'zone_name':'Zone','circle_name':'Circle'})
+        .rename(columns={'zone_name': 'Zone', 'circle_name': 'Circle'})
     )
-    circle_df['Avg_Duration'] = circle_df['Avg_Duration'].map(lambda x: f"{x:.1f} hrs" if pd.notna(x) else "N/A")
+    circle_df['Avg_Duration'] = circle_df['Avg_Duration'].map(
+        lambda x: f"{x:.1f} hrs" if pd.notna(x) else "N/A"
+    )
     st.dataframe(circle_df, hide_index=True, use_container_width=True)
 
-    # Division breakdown within selected circle
     if selected_zone != "All":
-        selected_circle = st.selectbox("Filter by Circle", options=["All"] + sorted(filtered['circle_name'].dropna().unique().tolist()))
+        selected_circle = st.selectbox(
+            "Filter by Circle",
+            options=["All"] + sorted(filtered['circle_name'].dropna().unique().tolist())
+        )
         filtered_div = filtered if selected_circle == "All" else filtered[filtered['circle_name'] == selected_circle]
 
         div_df = (
             filtered_div.groupby(['circle_name', 'division_name'])
             .agg(
-                PTWs_Issued   = ('ptw_id',      'nunique'),
-                JEs_Active    = ('permit_je',   'nunique'),
-                Grids_Covered = ('grid_code',   'nunique'),
-                Avg_Duration  = ('duration_hrs','mean'),
+                PTWs_Issued   = ('ptw_id',       'nunique'),
+                JEs_Active    = ('permit_je',    'nunique'),
+                Grids_Covered = ('grid_code',    'nunique'),
+                Avg_Duration  = ('duration_hrs', 'mean'),
             )
             .reset_index()
-            .rename(columns={'circle_name':'Circle','division_name':'Division'})
+            .rename(columns={'circle_name': 'Circle', 'division_name': 'Division'})
         )
-        div_df['Avg_Duration'] = div_df['Avg_Duration'].map(lambda x: f"{x:.1f} hrs" if pd.notna(x) else "N/A")
+        div_df['Avg_Duration'] = div_df['Avg_Duration'].map(
+            lambda x: f"{x:.1f} hrs" if pd.notna(x) else "N/A"
+        )
         st.markdown("**Division-Level Breakdown**")
         st.dataframe(div_df, hide_index=True, use_container_width=True)
 
@@ -219,16 +260,23 @@ def render_ptw_lm_dashboard():
     feeder_df = (
         df.groupby('feeders')
         .agg(
-            PTWs      = ('ptw_id',    'nunique'),
-            JEs       = ('permit_je', 'nunique'),
-            Avg_Dur   = ('duration_hrs', 'mean'),
+            PTWs    = ('ptw_id',       'nunique'),
+            JEs     = ('permit_je',    'nunique'),
+            Avg_Dur = ('duration_hrs', 'mean'),
         )
         .reset_index()
         .sort_values('PTWs', ascending=False)
         .head(20)
     )
-    feeder_df['Avg_Dur'] = feeder_df['Avg_Dur'].map(lambda x: f"{x:.1f} hrs" if pd.notna(x) else "N/A")
-    feeder_df.rename(columns={'feeders':'Feeder','PTWs':'PTWs Issued','JEs':'JEs Active','Avg_Dur':'Avg Duration'}, inplace=True)
+    feeder_df['Avg_Dur'] = feeder_df['Avg_Dur'].map(
+        lambda x: f"{x:.1f} hrs" if pd.notna(x) else "N/A"
+    )
+    feeder_df.rename(columns={
+        'feeders': 'Feeder',
+        'PTWs':    'PTWs Issued',
+        'JEs':     'JEs Active',
+        'Avg_Dur': 'Avg Duration'
+    }, inplace=True)
     st.caption("Top 20 Feeders by PTW Activity")
     st.dataframe(feeder_df, hide_index=True, use_container_width=True)
 
@@ -238,10 +286,18 @@ def render_ptw_lm_dashboard():
 
     jes   = df.groupby('zone_name')['permit_je'].nunique().reindex(ZONES, fill_value=0)
     grids = df.groupby('zone_name')['grid_code'].nunique().reindex(ZONES, fill_value=0)
-    pspcl = df[df['grid_ownership'] == 'PSPCL'].groupby('zone_name')['grid_code'].nunique().reindex(ZONES, fill_value=0)
-    pstcl = df[df['grid_ownership'] == 'PSTCL'].groupby('zone_name')['grid_code'].nunique().reindex(ZONES, fill_value=0)
-    ptws  = df.groupby('zone_name')['ptw_id'].nunique().reindex(ZONES, fill_value=0)
-    dur   = df.groupby('zone_name')['duration_hrs'].mean().reindex(ZONES)
+    pspcl = (
+        df[df['grid_ownership'] == 'PSPCL']
+        .groupby('zone_name')['grid_code'].nunique()
+        .reindex(ZONES, fill_value=0)
+    )
+    pstcl = (
+        df[df['grid_ownership'] == 'PSTCL']
+        .groupby('zone_name')['grid_code'].nunique()
+        .reindex(ZONES, fill_value=0)
+    )
+    ptws = df.groupby('zone_name')['ptw_id'].nunique().reindex(ZONES, fill_value=0)
+    dur  = df.groupby('zone_name')['duration_hrs'].mean().reindex(ZONES)
 
     data_dict = {
         "Metric": [
@@ -258,10 +314,10 @@ def render_ptw_lm_dashboard():
     }
 
     for z in ZONES:
-        je_den     = ZONE_TOTALS[z]['Total JEs']
-        je_share   = f"{(jes[z] / je_den):.1%}" if je_den > 0 else "0.0%"
-        pspcl_den  = ZONE_TOTALS[z]['PSPCL_G']
-        pstcl_den  = ZONE_TOTALS[z]['PSTCL_G']
+        je_den    = ZONE_TOTALS[z]['Total JEs']
+        je_share  = f"{(jes[z] / je_den):.1%}" if je_den > 0 else "0.0%"
+        pspcl_den = ZONE_TOTALS[z]['PSPCL_G']
+        pstcl_den = ZONE_TOTALS[z]['PSTCL_G']
 
         if z in ['South', 'East']:
             combined_pspcl = pspcl['South'] + pspcl['East']
@@ -306,11 +362,18 @@ def render_ptw_lm_dashboard():
                     norm = (val - min_val) / (max_val - min_val) if max_val > min_val else 0.5
                     if norm < 0.5:
                         pct = norm / 0.5
-                        r, g, b = int(248 + (255-248)*pct), int(105 + (235-105)*pct), int(107 + (132-107)*pct)
+                        r = int(248 + (255 - 248) * pct)
+                        g = int(105 + (235 - 105) * pct)
+                        b = int(107 + (132 - 107) * pct)
                     else:
                         pct = (norm - 0.5) / 0.5
-                        r, g, b = int(255 + (99-255)*pct), int(235 + (195-235)*pct), int(132 + (132-132)*pct)
-                    styles[i+1] = f'background-color:rgba({r},{g},{b},0.6);color:#000000;font-weight:500;'
+                        r = int(255 + (99  - 255) * pct)
+                        g = int(235 + (195 - 235) * pct)
+                        b = int(132 + (132 - 132) * pct)
+                    styles[i + 1] = (
+                        f'background-color:rgba({r},{g},{b},0.6);'
+                        f'color:#000000;font-weight:500;'
+                    )
         return styles
 
     styled_df = performance_df.style.apply(apply_gradient, axis=1)
