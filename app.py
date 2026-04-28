@@ -58,7 +58,7 @@ st.markdown("""
         font-weight: 600;
         letter-spacing: 2px;
         text-transform: uppercase;
-        padding: 50px 16px;
+        padding: 5px 16px;
         border-radius: 20px;
         margin-bottom: 10px;
     }
