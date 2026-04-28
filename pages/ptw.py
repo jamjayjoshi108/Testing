@@ -170,7 +170,9 @@ st.title("📱 PTW Tracker")
 
 # full_df = load_csv_data()
 # ── Custom Loading Screen ─────────────────────────────────────────────────────
-st.markdown("""
+loader = st.empty()
+
+loader.markdown("""
 <style>
     .loader-overlay {
         position: fixed; inset: 0;
@@ -225,7 +227,7 @@ st.markdown("""
 
 full_df = load_csv_data()
 
-st.empty()   # clears the overlay once data is loaded
+loader.empty()   # ← NOW this works — clears the exact element it was written into
 
 start_date, end_date = render_date_selector("ptw")
 st.divider()
