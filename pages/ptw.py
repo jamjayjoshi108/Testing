@@ -153,7 +153,7 @@ if st.button("← Back to Command Center"):
 # ─────────────────────────────────────────────────────────────
 # MAIN DASHBOARD
 # ─────────────────────────────────────────────────────────────
-st.title("🛠️ PTW Tracker")
+st.title("📱 PTW Tracker")
 
 full_df = load_csv_data()
 
