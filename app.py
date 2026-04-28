@@ -239,7 +239,7 @@ for i, (col, mod) in enumerate(zip(cols1, modules[:3])):
         </a>
         """, unsafe_allow_html=True)
 
-for i, (col, mod) in enumerate(zip(cols2, modules[3:5])):
+for i, (col, mod) in enumerate(zip(cols2, modules[3:6])):
     with col:
         st.markdown(f"""
         <a href="/{mod['page']}" target="_self" class="module-card card-{i+3}">
@@ -249,7 +249,7 @@ for i, (col, mod) in enumerate(zip(cols2, modules[3:5])):
         </a>
         """, unsafe_allow_html=True)
 
-for i, (col, mod) in enumerate(zip(cols3, modules[5:])):
+for i, (col, mod) in enumerate(zip(cols3, modules[6:])):
     with col:
         st.markdown(f"""
         <a href="/{mod['page']}" target="_self" class="module-card card-{i+3}">
