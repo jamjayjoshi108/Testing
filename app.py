@@ -1,6 +1,6 @@
 ## ============================================================================================================================================
 ## ============================================================================================================================================
-## Working Version with logo
+## Working Version with logo + Animation
 ## ============================================================================================================================================
 ## ============================================================================================================================================
 import streamlit as st
@@ -11,6 +11,119 @@ st.set_page_config(
     page_icon="⚡",
     layout="wide",
 )
+
+# ── Particle Animation (injected as fixed full-page background) ───────────────
+st.markdown("""
+<style>
+    #particles-canvas {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw; height: 100vh;
+        z-index: 0;
+        pointer-events: none;
+    }
+</style>
+<canvas id="particles-canvas"></canvas>
+<script>
+(function() {
+    const canvas = document.getElementById('particles-canvas');
+    const ctx = canvas.getContext('2d');
+
+    let W = canvas.width  = window.innerWidth;
+    let H = canvas.height = window.innerHeight;
+
+    const PARTICLE_COUNT = 90;
+    const MAX_DIST       = 150;
+    const SPEED          = 0.6;
+    const DOT_RADIUS     = 2.5;
+    const DOT_COLOR      = '0, 102, 204';
+    const LINE_COLOR     = '0, 102, 204';
+
+    let mouse = { x: null, y: null };
+
+    window.addEventListener('mousemove', e => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+    });
+    window.addEventListener('mouseleave', () => {
+        mouse.x = null;
+        mouse.y = null;
+    });
+    window.addEventListener('resize', () => {
+        W = canvas.width  = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+    });
+
+    class Particle {
+        constructor() { this.reset(true); }
+        reset(init) {
+            this.x  = Math.random() * W;
+            this.y  = Math.random() * H;
+            this.vx = (Math.random() - 0.5) * SPEED;
+            this.vy = (Math.random() - 0.5) * SPEED;
+            this.r  = DOT_RADIUS;
+        }
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            if (this.x < 0 || this.x > W) this.vx *= -1;
+            if (this.y < 0 || this.y > H) this.vy *= -1;
+        }
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${DOT_COLOR}, 0.75)`;
+            ctx.fill();
+        }
+    }
+
+    const particles = Array.from({ length: PARTICLE_COUNT }, () => new Particle());
+
+    function connectParticles() {
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+                const dx = particles[i].x - particles[j].x;
+                const dy = particles[i].y - particles[j].y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < MAX_DIST) {
+                    const alpha = 1 - dist / MAX_DIST;
+                    ctx.beginPath();
+                    ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(particles[j].x, particles[j].y);
+                    ctx.strokeStyle = `rgba(${LINE_COLOR}, ${alpha * 0.35})`;
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
+            }
+            // connect to mouse
+            if (mouse.x !== null) {
+                const dx = particles[i].x - mouse.x;
+                const dy = particles[i].y - mouse.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < MAX_DIST * 1.5) {
+                    const alpha = 1 - dist / (MAX_DIST * 1.5);
+                    ctx.beginPath();
+                    ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(mouse.x, mouse.y);
+                    ctx.strokeStyle = `rgba(${LINE_COLOR}, ${alpha * 0.55})`;
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
+            }
+        }
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, W, H);
+        particles.forEach(p => { p.update(); p.draw(); });
+        connectParticles();
+        requestAnimationFrame(animate);
+    }
+
+    animate();
+})();
+</script>
+""", unsafe_allow_html=True)
 
 st.markdown("""
 <style>
@@ -27,6 +140,10 @@ st.markdown("""
         background: linear-gradient(145deg, #f8f9fb 0%, #eef1f7 50%, #f4f6fa 100%);
         min-height: 100vh;
     }
+
+    /* Make sure all Streamlit content sits above the canvas */
+    .stApp > * { position: relative; z-index: 1; }
+    .block-container { position: relative; z-index: 1; }
 
     .block-container {
         padding-top: clamp(12px, 2vh, 28px) !important;
@@ -144,7 +261,7 @@ st.markdown("""
         animation: fadeSlideDown 1s ease both;
     }
 
-    /* ── Cards — tall to fill screen ── */
+    /* ── Cards ── */
     .module-card {
         background: #ffffff;
         border: 1.5px solid rgba(0, 102, 204, 0.1);
@@ -305,6 +422,315 @@ for i, (col, mod) in enumerate(zip(cols2, modules[4:])):
 
 # ── Footer ────────────────────────────────────────────────────────────────────
 st.markdown('<div class="footer">Wrought with ❤️ by Jay Joshi</div>', unsafe_allow_html=True)
+
+
+## ============================================================================================================================================
+## ============================================================================================================================================
+## Working Version with logo
+## ============================================================================================================================================
+## ============================================================================================================================================
+# import streamlit as st
+# import streamlit.components.v1 as components
+
+# st.set_page_config(
+#     page_title="PSPCL Operations",
+#     page_icon="⚡",
+#     layout="wide",
+# )
+
+# st.markdown("""
+# <style>
+#     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+#     html, body, [class*="css"] {
+#         font-family: 'Inter', sans-serif;
+#         margin: 0; padding: 0;
+#     }
+
+#     #MainMenu, footer, header { visibility: hidden; }
+
+#     .stApp {
+#         background: linear-gradient(145deg, #f8f9fb 0%, #eef1f7 50%, #f4f6fa 100%);
+#         min-height: 100vh;
+#     }
+
+#     .block-container {
+#         padding-top: clamp(12px, 2vh, 28px) !important;
+#         padding-bottom: clamp(10px, 2vh, 24px) !important;
+#         padding-left: clamp(16px, 4vw, 64px) !important;
+#         padding-right: clamp(16px, 4vw, 64px) !important;
+#         max-width: 100% !important;
+#     }
+#     [data-testid="stSidebar"] { display: none !important; }
+#     [data-testid="collapsedControl"] { display: none !important; }
+
+#     /* ── Header Bar ── */
+#     .header-bar {
+#         display: flex;
+#         align-items: center;
+#         justify-content: space-between;
+#         padding: clamp(14px, 2.2vh, 28px) clamp(20px, 3vw, 40px);
+#         background: #ffffff;
+#         border-radius: 16px;
+#         box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+#         border: 1.5px solid rgba(0,102,204,0.08);
+#         margin-bottom: clamp(10px, 1.5vh, 20px);
+#         animation: fadeSlideDown 0.7s ease both;
+#     }
+#     .header-left {
+#         display: flex;
+#         align-items: center;
+#         gap: clamp(14px, 2vw, 28px);
+#     }
+#     .header-logo {
+#         width: clamp(70px, 9vw, 110px);
+#         height: auto;
+#         filter: drop-shadow(0 2px 6px rgba(0,0,0,0.1));
+#     }
+#     .header-dept-name {
+#         color: #0066cc;
+#         font-size: clamp(0.9rem, 1.5vw, 1.2rem);
+#         font-weight: 800;
+#         letter-spacing: 1.5px;
+#         text-transform: uppercase;
+#     }
+#     .header-dept-sub {
+#         color: #8a9ab5;
+#         font-size: clamp(0.72rem, 1vw, 0.88rem);
+#         font-weight: 500;
+#         margin-top: 4px;
+#     }
+#     .header-right h1 {
+#         font-size: clamp(1.6rem, 3.2vw, 2.8rem);
+#         font-weight: 800;
+#         color: #0d1f3c;
+#         margin: 0;
+#         letter-spacing: -0.5px;
+#         line-height: 1.1;
+#         text-align: right;
+#     }
+#     .header-right h1 span {
+#         background: linear-gradient(90deg, #0066cc, #0099ff);
+#         -webkit-background-clip: text;
+#         -webkit-text-fill-color: transparent;
+#     }
+
+#     @keyframes fadeSlideDown {
+#         from { opacity: 0; transform: translateY(-24px); }
+#         to   { opacity: 1; transform: translateY(0); }
+#     }
+
+#     /* ── Status dots ── */
+#     .status-dot-green {
+#         display: inline-block;
+#         width: 8px; height: 8px;
+#         background: #00cc66;
+#         border-radius: 50%;
+#         position: absolute;
+#         top: 14px; right: 14px;
+#         animation: pulseGreen 2s infinite;
+#     }
+#     .status-dot-red {
+#         display: inline-block;
+#         width: 8px; height: 8px;
+#         background: #ff3b3b;
+#         border-radius: 50%;
+#         position: absolute;
+#         top: 14px; right: 14px;
+#         animation: pulseRed 2s infinite;
+#     }
+#     @keyframes pulseGreen {
+#         0%   { box-shadow: 0 0 0 0 rgba(0,204,102,0.5); }
+#         70%  { box-shadow: 0 0 0 7px rgba(0,204,102,0); }
+#         100% { box-shadow: 0 0 0 0 rgba(0,204,102,0); }
+#     }
+#     @keyframes pulseRed {
+#         0%   { box-shadow: 0 0 0 0 rgba(255,59,59,0.5); }
+#         70%  { box-shadow: 0 0 0 7px rgba(255,59,59,0); }
+#         100% { box-shadow: 0 0 0 0 rgba(255,59,59,0); }
+#     }
+
+#     /* ── Divider ── */
+#     .divider {
+#         height: 1.5px;
+#         background: linear-gradient(90deg, transparent, rgba(0,102,204,0.3), transparent);
+#         margin: clamp(4px, 0.6vh, 8px) 60px clamp(6px, 1vh, 14px);
+#         animation: fadeSlideDown 0.9s ease both;
+#     }
+
+#     /* ── Section label ── */
+#     .section-label {
+#         color: #8a9ab5;
+#         font-size: clamp(0.58rem, 0.85vw, 0.7rem);
+#         font-weight: 700;
+#         letter-spacing: 3px;
+#         text-transform: uppercase;
+#         text-align: center;
+#         margin-bottom: clamp(10px, 1.5vh, 18px);
+#         animation: fadeSlideDown 1s ease both;
+#     }
+
+#     /* ── Cards — tall to fill screen ── */
+#     .module-card {
+#         background: #ffffff;
+#         border: 1.5px solid rgba(0, 102, 204, 0.1);
+#         border-radius: 18px;
+#         padding: clamp(16px, 2.5vh, 36px) clamp(12px, 2vw, 24px);
+#         text-align: center;
+#         cursor: pointer;
+#         transition: all 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+#         position: relative;
+#         overflow: hidden;
+#         height: clamp(140px, 25vh, 260px);
+#         display: flex;
+#         flex-direction: column;
+#         align-items: center;
+#         justify-content: center;
+#         box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+#         margin-bottom: clamp(8px, 1.4vh, 18px);
+#         text-decoration: none !important;
+#         color: inherit !important;
+#     }
+#     .module-card:hover, .module-card:visited, .module-card:active {
+#         text-decoration: none !important;
+#         color: inherit !important;
+#     }
+#     .module-card::before {
+#         content: '';
+#         position: absolute;
+#         top: 0; left: 0; right: 0;
+#         height: 3px;
+#         background: linear-gradient(90deg, #0066cc, #0099ff, #00ccff);
+#         transform: scaleX(0);
+#         transform-origin: left;
+#         transition: transform 0.35s ease;
+#         border-radius: 18px 18px 0 0;
+#     }
+#     .module-card:hover::before { transform: scaleX(1); }
+#     .module-card:hover {
+#         border-color: rgba(0, 102, 204, 0.3);
+#         transform: translateY(-6px);
+#         box-shadow: 0 16px 40px rgba(0, 102, 204, 0.14);
+#     }
+
+#     .card-0 { animation: cardIn 0.5s ease 0.1s both; }
+#     .card-1 { animation: cardIn 0.5s ease 0.2s both; }
+#     .card-2 { animation: cardIn 0.5s ease 0.3s both; }
+#     .card-3 { animation: cardIn 0.5s ease 0.4s both; }
+#     .card-4 { animation: cardIn 0.5s ease 0.5s both; }
+#     .card-5 { animation: cardIn 0.5s ease 0.6s both; }
+#     .card-6 { animation: cardIn 0.5s ease 0.7s both; }
+#     .card-7 { animation: cardIn 0.5s ease 0.8s both; }
+
+#     @keyframes cardIn {
+#         from { opacity: 0; transform: translateY(20px) scale(0.97); }
+#         to   { opacity: 1; transform: translateY(0) scale(1); }
+#     }
+
+#     .card-icon {
+#         font-size: clamp(2.2rem, 4vw, 3.2rem);
+#         margin-bottom: clamp(10px, 1.5vh, 18px);
+#         transition: transform 0.3s ease;
+#         filter: drop-shadow(0 2px 6px rgba(0,102,204,0.15));
+#     }
+#     .module-card:hover .card-icon { transform: scale(1.12) rotate(-4deg); }
+
+#     .card-title {
+#         color: #0d1f3c;
+#         font-size: clamp(0.85rem, 1.3vw, 1.05rem);
+#         font-weight: 700;
+#         letter-spacing: 0.1px;
+#         line-height: 1.4;
+#         padding: 0 8px;
+#         text-decoration: none !important;
+#     }
+
+#     .card-arrow {
+#         position: absolute;
+#         bottom: 12px; right: 16px;
+#         color: rgba(0, 102, 204, 0.25);
+#         font-size: 0.85rem;
+#         font-weight: 700;
+#         transition: all 0.3s ease;
+#     }
+#     .module-card:hover .card-arrow {
+#         color: #0066cc;
+#         transform: translateX(4px);
+#     }
+
+#     [data-testid="column"] { padding: 0 clamp(4px, 0.5vw, 10px) !important; }
+
+#     .footer {
+#         text-align: center;
+#         color: #b0bdd0;
+#         font-size: clamp(0.62rem, 0.85vw, 0.73rem);
+#         padding: clamp(6px, 1vh, 12px) 20px 4px;
+#         letter-spacing: 0.3px;
+#         animation: fadeSlideDown 1.2s ease both;
+#     }
+# </style>
+# """, unsafe_allow_html=True)
+
+# # ── Header ────────────────────────────────────────────────────────────────────
+# st.markdown("""
+# <div class="header-bar">
+#     <div class="header-left">
+#         <img src="https://raw.githubusercontent.com/jamjayjoshi108/Testing/main/gop logo.png"
+#              class="header-logo" alt="Govt of Punjab"/>
+#         <div>
+#             <div class="header-dept-name">Punjab Development Commission</div>
+#             <div class="header-dept-sub">Government of Punjab</div>
+#         </div>
+#     </div>
+#     <div class="header-right">
+#         <h1>PSPCL <span>Operations</span></h1>
+#     </div>
+# </div>
+# """, unsafe_allow_html=True)
+
+# st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
+# st.markdown('<div class="section-label">Operational Modules</div>', unsafe_allow_html=True)
+
+# # ── Modules ───────────────────────────────────────────────────────────────────
+# modules = [
+#     {"icon": "📱", "title": "PTW App",                     "page": "ptw",                 "status": True},
+#     {"icon": "🚨", "title": "Outage Monitoring",            "page": "outage_mon",          "status": True},
+#     {"icon": "💡", "title": "Outage Reduction Plan (ORP)", "page": "orp",                 "status": True},
+#     {"icon": "🛡️", "title": "RDSS",                        "page": "rdss",                "status": False},
+#     {"icon": "📟", "title": "Smart Meter",                  "page": "smart_meter",         "status": False},
+#     {"icon": "🔌", "title": "New Connections",              "page": "new_conn",            "status": False},
+#     {"icon": "🤕", "title": "Consumer Complaints",          "page": "consumer_complaints", "status": False},
+# ]
+
+# cols1 = st.columns(4, gap="medium")
+# cols2 = st.columns(3, gap="medium")
+
+# for i, (col, mod) in enumerate(zip(cols1, modules[:4])):
+#     with col:
+#         dot_class = "status-dot-green" if mod["status"] else "status-dot-red"
+#         st.markdown(f"""
+#         <a href="/{mod['page']}" target="_self" class="module-card card-{i}">
+#             <span class="{dot_class}"></span>
+#             <div class="card-icon">{mod['icon']}</div>
+#             <div class="card-title">{mod['title']}</div>
+#             <div class="card-arrow">→</div>
+#         </a>
+#         """, unsafe_allow_html=True)
+
+# for i, (col, mod) in enumerate(zip(cols2, modules[4:])):
+#     with col:
+#         dot_class = "status-dot-green" if mod["status"] else "status-dot-red"
+#         st.markdown(f"""
+#         <a href="/{mod['page']}" target="_self" class="module-card card-{i+4}">
+#             <span class="{dot_class}"></span>
+#             <div class="card-icon">{mod['icon']}</div>
+#             <div class="card-title">{mod['title']}</div>
+#             <div class="card-arrow">→</div>
+#         </a>
+#         """, unsafe_allow_html=True)
+
+# # ── Footer ────────────────────────────────────────────────────────────────────
+# st.markdown('<div class="footer">Wrought with ❤️ by Jay Joshi</div>', unsafe_allow_html=True)
 
 
 ## ============================================================================================================================================
