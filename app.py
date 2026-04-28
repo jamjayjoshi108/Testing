@@ -1,3 +1,6 @@
+# #================================================================================================================================
+# V2
+# #================================================================================================================================
 import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta, timezone, date
@@ -650,12 +653,13 @@ with tab3:
 
             # ── Step 5: KPI Cards ─────────────────────────────────────────
             kpi1, kpi2 = st.columns(2)
-            with kpi1:
+            with kpi1:                
                 st.markdown(
                     f'<div class="kpi-card"><div>'
                     f'<div class="kpi-title">Total PTW Requests</div>'
                     f'<div class="kpi-value">{total_ptws}</div>'
                     f'</div><div class="kpi-subtext">'
+                    f'<span class="status-badge"> </span>'
                     f'</div></div>',
                     unsafe_allow_html=True
                 )
@@ -679,15 +683,25 @@ with tab3:
                 st.dataframe(repeat_feeders.style.set_table_styles(HEADER_STYLES), width="stretch", hide_index=True)
             else:
                 st.success("No feeders had multiple PTWs requested against them in the selected timeframe! 🎉")
-# import requests
+
+
+
+# #================================================================================================================================
+# V1
+# #================================================================================================================================
+
 # import streamlit as st
 # import pandas as pd
 # from datetime import datetime, timedelta, timezone, date
 
-# # --- PAGE CONFIGURATION ---
+# # ─────────────────────────────────────────────────────────────
+# # PAGE CONFIGURATION
+# # ─────────────────────────────────────────────────────────────
 # st.set_page_config(page_title="Power Outage Monitoring Dashboard", layout="wide")
 
-# # --- GLOBAL TABLE HEADER STYLING ---
+# # ─────────────────────────────────────────────────────────────
+# # GLOBAL TABLE HEADER STYLING
+# # ─────────────────────────────────────────────────────────────
 # HEADER_STYLES = [
 #     {
 #         'selector': 'th',
@@ -707,7 +721,9 @@ with tab3:
 #     }
 # ]
 
-# # --- COLOR THEME & ENTERPRISE CSS ---
+# # ─────────────────────────────────────────────────────────────
+# # COLOR THEME & ENTERPRISE CSS
+# # ─────────────────────────────────────────────────────────────
 # st.markdown("""
 #     <style>
 #         .block-container { padding-top: 1.5rem; padding-bottom: 1.5rem; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -729,78 +745,98 @@ with tab3:
 #     </style>
 # """, unsafe_allow_html=True)
 
-# # --- IST TIMEZONE SETUP ---
-# IST = timezone(timedelta(hours=5, minutes=30))
+# # ─────────────────────────────────────────────────────────────
+# # IST TIMEZONE
+# # ─────────────────────────────────────────────────────────────
+# IST     = timezone(timedelta(hours=5, minutes=30))
 # now_ist = datetime.now(IST)
 
 # # ─────────────────────────────────────────────────────────────
-# # S3 PUBLIC CSV URLs  ← only change these if your bucket/region differs
+# # S3 CSV URLs
 # # ─────────────────────────────────────────────────────────────
 # OUTAGES_URL = "https://pspcl-dashboard-data.s3.ap-south-1.amazonaws.com/outages.csv"
 # PTW_URL     = "https://pspcl-dashboard-data.s3.ap-south-1.amazonaws.com/ptw_requests.csv"
 
+# OUTAGES_COLS = [
+#     "outage_id", "zone_name", "circle_name", "feeder_name",
+#     "outage_type", "outage_status", "start_time", "end_time",
+#     "duration_minutes", "created_time"
+# ]
+# PTW_COLS = [
+#     "ptw_id", "circle_name", "feeders", "current_status", "creation_date"
+# ]
 
 # # ─────────────────────────────────────────────────────────────
-# # DATA LOADING & CLEANING
+# # DATA LOADING
 # # ─────────────────────────────────────────────────────────────
+# @st.cache_data(ttl=3600)
+# def load_data():
+#     with st.spinner("⏳ Loading data from PSPCL database..."):
+#         df_outages = pd.read_csv(
+#             OUTAGES_URL,
+#             usecols=OUTAGES_COLS,
+#             low_memory=False,
+#             dtype={
+#                 "outage_id":        "str",
+#                 "zone_name":        "category",
+#                 "circle_name":      "category",
+#                 "feeder_name":      "category",
+#                 "outage_type":      "category",
+#                 "outage_status":    "category",
+#                 "duration_minutes": "float32",
+#             },
+#             parse_dates=["start_time", "end_time", "created_time"]
+#         )
+#         df_ptw = pd.read_csv(
+#             PTW_URL,
+#             usecols=PTW_COLS,
+#             low_memory=False,
+#             dtype={
+#                 "ptw_id":         "str",
+#                 "circle_name":    "category",
+#                 "current_status": "category",
+#             },
+#             parse_dates=["creation_date"]
+#         )
+#     return df_outages, df_ptw
 
+# df_outages_raw, df_ptw_raw = load_data()
+
+# # ─────────────────────────────────────────────────────────────
+# # CLEAN OUTAGE DATA
+# # ─────────────────────────────────────────────────────────────
 # def clean_outage_data(df):
-#     """Standardizes dates, buckets, and derived columns from the new CSV schema."""
 #     if df.empty:
 #         return df
-
-#     # Remove cancelled outages
+#     df = df.copy()
 #     if 'outage_status' in df.columns:
 #         df = df[~df['outage_status'].astype(str).str.contains('Cancel', na=False, case=False)]
 #         df['status_calc'] = df['outage_status'].apply(
 #             lambda x: 'Active' if str(x).strip().upper() in ['OPEN', 'ACTIVE'] else 'Closed'
 #         )
-
-#     # Parse datetime columns
-#     for col in ['created_time', 'start_time', 'end_time', 'last_updated']:
-#         if col in df.columns:
-#             df[col] = pd.to_datetime(df[col], errors='coerce')
-
-#     # Duration bucket from duration_minutes
 #     if 'duration_minutes' in df.columns:
 #         df['duration_minutes'] = pd.to_numeric(df['duration_minutes'], errors='coerce').fillna(0)
-
 #         def assign_bucket(mins):
-#             if pd.isna(mins) or mins < 0:
-#                 return "Active/Unknown"
+#             if mins < 0: return "Active/Unknown"
 #             hrs = mins / 60
-#             if hrs <= 2:    return "Up to 2 Hrs"
-#             elif hrs <= 4:  return "2-4 Hrs"
-#             elif hrs <= 8:  return "4-8 Hrs"
-#             else:           return "Above 8 Hrs"
-
+#             if hrs <= 2:   return "Up to 2 Hrs"
+#             elif hrs <= 4: return "2-4 Hrs"
+#             elif hrs <= 8: return "4-8 Hrs"
+#             else:          return "Above 8 Hrs"
 #         df['duration_bucket'] = df['duration_minutes'].apply(assign_bucket)
-
-#     # Derive outage_date from start_time
 #     if 'start_time' in df.columns:
-#         df['outage_date'] = df['start_time'].dt.date
-
+#         df['outage_date'] = pd.to_datetime(df['start_time'], errors='coerce').dt.date
 #     return df
 
+# df_master     = clean_outage_data(df_outages_raw)
+# df_ptw_master = df_ptw_raw.copy()
 
-# @st.cache_data(ttl="15m")
-# def load_data():
-#     df_outages = pd.read_csv(OUTAGES_URL)
-#     df_ptw     = pd.read_csv(PTW_URL)
-#     return clean_outage_data(df_outages), df_ptw
-
-
-# df_master, df_ptw_master = load_data()
-
-# # De-duplicate PTW by ptw_id keeping last (latest status)
 # if not df_ptw_master.empty and 'ptw_id' in df_ptw_master.columns:
 #     df_ptw_master = df_ptw_master.drop_duplicates(subset=['ptw_id'], keep='last')
 
-
 # # ─────────────────────────────────────────────────────────────
-# # YoY HELPERS  (same logic, updated column names)
+# # HELPER FUNCTIONS
 # # ─────────────────────────────────────────────────────────────
-
 # def safe_ly_date(dt):
 #     try:
 #         return dt.replace(year=dt.year - 1)
@@ -817,13 +853,13 @@ with tab3:
 #         g = df.groupby([group_col, 'outage_type']).agg(
 #             Count=('outage_type', 'size'),
 #             TotalHrs=('duration_minutes', lambda x: round(x.sum() / 60, 2)),
-#             AvgHrs=('duration_minutes',  lambda x: round(x.mean() / 60, 2))
+#             AvgHrs=('duration_minutes',   lambda x: round(x.mean() / 60, 2))
 #         ).unstack(fill_value=0)
 #         g.columns = [f"{prefix} {outage} ({metric})" for metric, outage in g.columns]
 #         return g
 
-#     c_grp = _agg(df_curr, 'Curr')
-#     l_grp = _agg(df_ly,   'LY')
+#     c_grp  = _agg(df_curr, 'Curr')
+#     l_grp  = _agg(df_ly,   'LY')
 #     merged = pd.merge(c_grp, l_grp, on=group_col, how='outer').fillna(0).reset_index()
 
 #     expected_cols = []
@@ -846,11 +882,11 @@ with tab3:
 #     cols_order = [group_col,
 #                   'Curr Planned Outage (Count)', 'Curr Planned Outage (TotalHrs)', 'Curr Planned Outage (AvgHrs)',
 #                   'LY Planned Outage (Count)',   'LY Planned Outage (TotalHrs)',   'LY Planned Outage (AvgHrs)',
-#                   'Curr Unplanned Outage (Count)','Curr Unplanned Outage (TotalHrs)','Curr Unplanned Outage (AvgHrs)',
+#                   'Curr Unplanned Outage (Count)', 'Curr Unplanned Outage (TotalHrs)', 'Curr Unplanned Outage (AvgHrs)',
 #                   'LY Unplanned Outage (Count)', 'LY Unplanned Outage (TotalHrs)', 'LY Unplanned Outage (AvgHrs)',
 #                   'Curr Total (Count)', 'LY Total (Count)', 'YoY Delta (Total)']
 #     cols_order = [c for c in cols_order if c in merged.columns]
-#     merged = merged[cols_order]
+#     merged     = merged[cols_order]
 
 #     if not merged.empty:
 #         gt_row = pd.Series(index=cols_order, dtype=object)
@@ -875,11 +911,11 @@ with tab3:
 #     def _process(df, yr):
 #         if df.empty: return pd.DataFrame()
 #         d = df.copy()
-#         d['DateObj']    = pd.to_datetime(d['outage_date'])
-#         d['Month_Num']  = d['DateObj'].dt.month
-#         d['Week_Num']   = ((d['DateObj'].dt.day - 1) // 7) + 1
-#         d['Week_Label'] = d['DateObj'].dt.strftime('%b') + " w" + d['Week_Num'].astype(str)
-#         d['outage_type'] = d['outage_type'].replace({'Power Off By PC': 'Power off by PC'})
+#         d['DateObj']     = pd.to_datetime(d['outage_date'])
+#         d['Month_Num']   = d['DateObj'].dt.month
+#         d['Week_Num']    = ((d['DateObj'].dt.day - 1) // 7) + 1
+#         d['Week_Label']  = d['DateObj'].dt.strftime('%b') + " w" + d['Week_Num'].astype(str)
+#         d['outage_type'] = d['outage_type'].astype(str).replace({'Power Off By PC': 'Power off by PC'})
 #         grp = d.groupby(['Month_Num', 'Week_Num', 'Week_Label', 'outage_type']).size().unstack(fill_value=0)
 #         return grp.rename(columns=lambda x: f"{x} ({yr})").reset_index()
 
@@ -887,22 +923,20 @@ with tab3:
 #     l_grp = _process(df_ly,   ly_yr)
 
 #     if c_grp.empty and l_grp.empty: return pd.DataFrame()
-#     if c_grp.empty:  merged = l_grp
+#     if c_grp.empty:   merged = l_grp
 #     elif l_grp.empty: merged = c_grp
 #     else: merged = pd.merge(c_grp, l_grp, on=['Month_Num', 'Week_Num', 'Week_Label'], how='outer').fillna(0)
 
-#     merged = merged.sort_values(['Month_Num', 'Week_Num']).reset_index(drop=True)
-
-#     cols_order   = ['Week_Label']
+#     merged     = merged.sort_values(['Month_Num', 'Week_Num']).reset_index(drop=True)
+#     cols_order = ['Week_Label']
 #     outage_types = ['Planned Outage', 'Unplanned Outage', 'Power off by PC']
-#     pct_cols     = []
+#     pct_cols   = []
 
 #     for ot in outage_types:
 #         c_col   = f"{ot} ({curr_yr})"
 #         l_col   = f"{ot} ({ly_yr})"
 #         pct_col = f"{ot} (% Change)"
 #         pct_cols.append(pct_col)
-
 #         if c_col not in merged.columns: merged[c_col] = 0
 #         if l_col not in merged.columns: merged[l_col] = 0
 #         merged[c_col] = merged[c_col].astype(int)
@@ -917,7 +951,6 @@ with tab3:
 #         merged[pct_col] = merged.apply(calc_pct, axis=1)
 #         cols_order.extend([c_col, l_col, pct_col])
 
-#     # Grand Total row
 #     total_row = {'Week_Label': 'Grand Total', 'Month_Num': 99, 'Week_Num': 99}
 #     for ot in outage_types:
 #         c_col, l_col = f"{ot} ({curr_yr})", f"{ot} ({ly_yr})"
@@ -925,33 +958,26 @@ with tab3:
 #         c_sum, l_sum = merged[c_col].sum(), merged[l_col].sum()
 #         total_row[c_col] = c_sum
 #         total_row[l_col] = l_sum
-#         if l_sum == 0 and c_sum == 0: total_row[pct_col] = 0.0
-#         elif l_sum == 0:              total_row[pct_col] = 100.0
-#         else:                         total_row[pct_col] = ((c_sum - l_sum) / l_sum) * 100.0
+#         if l_sum == 0 and c_sum == 0:  total_row[pct_col] = 0.0
+#         elif l_sum == 0:               total_row[pct_col] = 100.0
+#         else:                          total_row[pct_col] = ((c_sum - l_sum) / l_sum) * 100.0
 
 #     merged = pd.concat([merged, pd.DataFrame([total_row])], ignore_index=True)
-
 #     for pct_col in pct_cols:
 #         merged[pct_col] = merged[pct_col].apply(lambda x: f"{x:+.1f}%" if pd.notnull(x) else "")
 
 #     return merged[cols_order].rename(columns={'Week_Label': 'Weekly'})
 
 
-# # ─────────────────────────────────────────────────────────────
-# # STYLE HELPERS  (unchanged)
-# # ─────────────────────────────────────────────────────────────
-
 # def apply_pu_gradient(styler, df):
-#     p_cols  = [c for c in df.columns if 'Planned'    in str(c) and pd.api.types.is_numeric_dtype(df[c])]
-#     u_cols  = [c for c in df.columns if 'Unplanned'  in str(c) and pd.api.types.is_numeric_dtype(df[c])]
+#     p_cols  = [c for c in df.columns if 'Planned'         in str(c) and pd.api.types.is_numeric_dtype(df[c])]
+#     u_cols  = [c for c in df.columns if 'Unplanned'       in str(c) and pd.api.types.is_numeric_dtype(df[c])]
 #     pc_cols = [c for c in df.columns if 'Power Off By PC' in str(c) and pd.api.types.is_numeric_dtype(df[c])]
-
 #     try:
 #         group_col = df.columns[0]
 #         row_idx   = df.index[:-1] if (not df.empty and df.iloc[-1][group_col] == 'Grand Total') else df.index
 #     except:
 #         row_idx = df.index
-
 #     if p_cols:  styler = styler.background_gradient(subset=pd.IndexSlice[row_idx, p_cols],  cmap='Blues',   vmin=0)
 #     if pc_cols: styler = styler.background_gradient(subset=pd.IndexSlice[row_idx, pc_cols], cmap='Purples', vmin=0)
 #     if u_cols:  styler = styler.background_gradient(subset=pd.IndexSlice[row_idx, u_cols],  cmap='Reds',    vmin=0)
@@ -985,9 +1011,8 @@ with tab3:
 
 
 # # ─────────────────────────────────────────────────────────────
-# # DATE SELECTOR WIDGET  (unchanged)
+# # DATE SELECTOR WIDGET
 # # ─────────────────────────────────────────────────────────────
-
 # def handle_period_change(tab_key):
 #     period = st.session_state[f"{tab_key}_radio"]
 #     today  = now_ist.date()
@@ -1027,15 +1052,14 @@ with tab3:
 #         start_date = st.date_input("From Date", format="DD/MM/YYYY",
 #                                    disabled=(period != "Custom"), key=f"{tab_key}_start_date")
 #     with col2:
-#         end_date = st.date_input("To Date", format="DD/MM/YYYY",
-#                                  disabled=(period != "Custom"), key=f"{tab_key}_end_date")
+#         end_date   = st.date_input("To Date",   format="DD/MM/YYYY",
+#                                    disabled=(period != "Custom"), key=f"{tab_key}_end_date")
 #     return start_date, end_date
 
 
 # # ─────────────────────────────────────────────────────────────
-# # MAIN DASHBOARD RENDER
+# # MAIN DASHBOARD
 # # ─────────────────────────────────────────────────────────────
-
 # st.title("⚡ Power Outage Monitoring Dashboard")
 # tab1, tab2, tab3 = st.tabs(["📊 Dashboard", "📈 YoY Comparison", "🛠️ PTW Frequency"])
 
@@ -1048,7 +1072,7 @@ with tab3:
 #     st.divider()
 
 #     if not df_master.empty:
-#         mask_t1      = (df_master['outage_date'] >= start_d1) & (df_master['outage_date'] <= end_d1)
+#         mask_t1       = (df_master['outage_date'] >= start_d1) & (df_master['outage_date'] <= end_d1)
 #         filtered_tab1 = df_master[mask_t1].copy()
 #     else:
 #         filtered_tab1 = pd.DataFrame()
@@ -1060,24 +1084,24 @@ with tab3:
 #         pc_df        = filtered_tab1[filtered_tab1['outage_type'] == 'Power Off By PC']
 #         unplanned_df = filtered_tab1[filtered_tab1['outage_type'] == 'Unplanned Outage']
 
-#         # --- 1. KPI WIDGETS ---
+#         # --- KPI WIDGETS ---
 #         kpi1, kpi2, kpi3 = st.columns(3)
 #         with kpi1:
-#             active_p  = len(planned_df[planned_df['status_calc'] == 'Active'])   if 'status_calc' in planned_df   else 0
-#             closed_p  = len(planned_df[planned_df['status_calc'] == 'Closed'])   if 'status_calc' in planned_df   else len(planned_df)
+#             active_p = len(planned_df[planned_df['status_calc'] == 'Active'])   if 'status_calc' in planned_df.columns   else 0
+#             closed_p = len(planned_df[planned_df['status_calc'] == 'Closed'])   if 'status_calc' in planned_df.columns   else len(planned_df)
 #             st.markdown(f'<div class="kpi-card"><div><div class="kpi-title">Planned Outages</div><div class="kpi-value">{len(planned_df)}</div></div><div class="kpi-subtext"><span class="status-badge">🔴 Active: {active_p}</span> <span class="status-badge">🟢 Closed: {closed_p}</span></div></div>', unsafe_allow_html=True)
 #         with kpi2:
-#             active_pc = len(pc_df[pc_df['status_calc'] == 'Active'])             if 'status_calc' in pc_df        else 0
-#             closed_pc = len(pc_df[pc_df['status_calc'] == 'Closed'])             if 'status_calc' in pc_df        else len(pc_df)
+#             active_pc = len(pc_df[pc_df['status_calc'] == 'Active'])            if 'status_calc' in pc_df.columns        else 0
+#             closed_pc = len(pc_df[pc_df['status_calc'] == 'Closed'])            if 'status_calc' in pc_df.columns        else len(pc_df)
 #             st.markdown(f'<div class="kpi-card"><div><div class="kpi-title">Power Off By PC</div><div class="kpi-value">{len(pc_df)}</div></div><div class="kpi-subtext"><span class="status-badge">🔴 Active: {active_pc}</span> <span class="status-badge">🟢 Closed: {closed_pc}</span></div></div>', unsafe_allow_html=True)
 #         with kpi3:
-#             active_u  = len(unplanned_df[unplanned_df['status_calc'] == 'Active']) if 'status_calc' in unplanned_df else 0
-#             closed_u  = len(unplanned_df[unplanned_df['status_calc'] == 'Closed']) if 'status_calc' in unplanned_df else len(unplanned_df)
+#             active_u  = len(unplanned_df[unplanned_df['status_calc'] == 'Active']) if 'status_calc' in unplanned_df.columns else 0
+#             closed_u  = len(unplanned_df[unplanned_df['status_calc'] == 'Closed']) if 'status_calc' in unplanned_df.columns else len(unplanned_df)
 #             st.markdown(f'<div class="kpi-card"><div><div class="kpi-title">Unplanned Outages</div><div class="kpi-value">{len(unplanned_df)}</div></div><div class="kpi-subtext"><span class="status-badge">🔴 Active: {active_u}</span> <span class="status-badge">🟢 Closed: {closed_u}</span></div></div>', unsafe_allow_html=True)
 
 #         st.divider()
 
-#         # --- 2. ZONE-WISE DISTRIBUTION ---
+#         # --- ZONE-WISE DISTRIBUTION ---
 #         st.subheader("📍 Zone-wise Distribution")
 #         zone_df = filtered_tab1.groupby(['zone_name', 'outage_type']).size().unstack(fill_value=0).reset_index()
 #         zone_df.columns.name = None
@@ -1085,14 +1109,14 @@ with tab3:
 #             if col not in zone_df.columns: zone_df[col] = 0
 #         zone_df['Total'] = zone_df['Planned Outage'] + zone_df['Power Off By PC'] + zone_df['Unplanned Outage']
 #         zone_df = zone_df.rename(columns={'zone_name': 'Zone'})
-#         gt_row_zone = pd.Series(zone_df.sum(numeric_only=True), name='Grand Total')
+#         gt_row_zone         = pd.Series(zone_df.sum(numeric_only=True), name='Grand Total')
 #         gt_row_zone['Zone'] = 'Grand Total'
 #         zone_df = pd.concat([zone_df, pd.DataFrame([gt_row_zone])], ignore_index=True)
 #         st.dataframe(apply_pu_gradient(zone_df.style, zone_df).set_table_styles(HEADER_STYLES), width="stretch", hide_index=True)
 
 #         st.divider()
 
-#         # --- 3. NOTORIOUS FEEDERS ---
+#         # --- NOTORIOUS FEEDERS ---
 #         st.subheader("🚨 Notorious Feeders")
 #         total_days = (end_d1 - start_d1).days + 1
 
@@ -1108,10 +1132,10 @@ with tab3:
 #             st.caption(f"Range of {total_days} days selected. Applying 3-in-7 ratio: Feeders must have outages on at least **{noto_threshold} distinct days** to be flagged.")
 
 #         if not df_master.empty:
-#             mask_noto    = (df_master['outage_date'] >= noto_start_date) & (df_master['outage_date'] <= noto_end_date)
-#             dyn_noto_df  = df_master[mask_noto].copy()
+#             mask_noto   = (df_master['outage_date'] >= noto_start_date) & (df_master['outage_date'] <= noto_end_date)
+#             dyn_noto_df = df_master[mask_noto].copy()
 #         else:
-#             dyn_noto_df  = pd.DataFrame()
+#             dyn_noto_df = pd.DataFrame()
 
 #         noto_col1, noto_col2 = st.columns(2)
 #         all_circles = sorted(dyn_noto_df['circle_name'].dropna().unique().tolist()) if not dyn_noto_df.empty else []
@@ -1121,6 +1145,7 @@ with tab3:
 #         if selected_notorious_type != "All Types":
 #             dyn_noto_df = dyn_noto_df[dyn_noto_df['outage_type'] == selected_notorious_type]
 
+#         global_notorious_set = set()
 #         if not dyn_noto_df.empty:
 #             dyn_days = dyn_noto_df.groupby(['circle_name', 'feeder_name'])['outage_date'].nunique().reset_index(name='Days with Outages')
 #             dyn_noto = dyn_days[dyn_days['Days with Outages'] >= noto_threshold]
@@ -1134,29 +1159,26 @@ with tab3:
 #                 dyn_stats.rename(columns={'Total_Events': 'Total Outage Events'}, inplace=True)
 #                 dyn_stats['Total Duration (Hours)'] = (dyn_stats['Total_Mins'] / 60).round(2)
 #                 dyn_stats['Max Duration (Hours)']   = (dyn_stats['Max_Mins'] / 60).round(2)
-#                 dyn_stats = dyn_stats.drop(columns=['Max_Mins', 'Total_Mins'])
+#                 dyn_stats.drop(columns=['Max_Mins', 'Total_Mins'], inplace=True)
 
 #                 dyn_noto = dyn_noto.merge(dyn_stats, on=['circle_name', 'feeder_name']).sort_values(
 #                     by=['circle_name', 'Days with Outages', 'Total Outage Events'], ascending=[True, False, False]
 #                 )
-#                 dyn_noto   = dyn_noto.rename(columns={'circle_name': 'Circle', 'feeder_name': 'Feeder'})
-#                 dyn_top5   = dyn_noto.groupby('Circle').head(5)
+#                 dyn_noto             = dyn_noto.rename(columns={'circle_name': 'Circle', 'feeder_name': 'Feeder'})
+#                 dyn_top5             = dyn_noto.groupby('Circle').head(5)
 #                 global_notorious_set = set(zip(dyn_top5['Circle'], dyn_top5['Feeder']))
 
 #                 filtered_notorious = dyn_top5[dyn_top5['Circle'] == selected_notorious_circle] if selected_notorious_circle != "All Circles" else dyn_top5
-
 #                 if not filtered_notorious.empty:
 #                     st.dataframe(filtered_notorious.style.format({'Max Duration (Hours)': '{:.2f}', 'Total Duration (Hours)': '{:.2f}'}).set_table_styles(HEADER_STYLES), width="stretch", hide_index=True)
 #                 else:
 #                     st.info(f"No notorious feeders found for {selected_notorious_circle} matching the criteria.")
 #             else:
-#                 global_notorious_set = set()
 #                 st.info(f"No notorious feeders identified (no feeder hit the {noto_threshold}-day threshold). 🎉")
 #         else:
-#             global_notorious_set = set()
 #             st.info("No data available for the selected outage type/range.")
 
-#         # --- 4. CIRCLE-WISE BREAKDOWN & DRILLDOWN ---
+#         # --- CIRCLE-WISE BREAKDOWN & DRILLDOWN ---
 #         st.subheader("🔌 Comprehensive Circle-wise Breakdown")
 #         st.markdown(" **Click on any row inside the table below** to view the specific Feeder drill-down details.")
 
@@ -1174,12 +1196,13 @@ with tab3:
 #             circle_piv[('Overall Total', 'Total Events')] = circle_piv.loc[:, (slice(None), 'Total')].sum(axis=1)
 #             circle_piv.loc['Grand Total'] = circle_piv.sum(numeric_only=True)
 
-#             styled_circle    = apply_pu_gradient(circle_piv.style, circle_piv).set_table_styles(HEADER_STYLES)
-#             selection_circle = st.dataframe(styled_circle, width="stretch", on_select="rerun", selection_mode="single-row")
+#             selection_circle = st.dataframe(
+#                 apply_pu_gradient(circle_piv.style, circle_piv).set_table_styles(HEADER_STYLES),
+#                 width="stretch", on_select="rerun", selection_mode="single-row"
+#             )
 
 #             if len(selection_circle.selection.rows) > 0:
 #                 selected_circle = circle_piv.index[selection_circle.selection.rows[0]]
-
 #                 if selected_circle != 'Grand Total':
 #                     st.markdown(f"#### 🔍 Feeder Details for: **{selected_circle}**")
 
@@ -1187,24 +1210,24 @@ with tab3:
 #                         return ['background-color: rgba(220, 53, 69, 0.15); color: #850000; font-weight: bold'] * len(row) \
 #                                if (selected_circle, row['Feeder']) in global_notorious_set else [''] * len(row)
 
-#                     c_left, c_mid, c_right = st.columns(3)
 #                     format_dict = {'Diff in Hours': '{:.2f}'}
 
 #                     def prep_feeder_df(df_sub):
 #                         if df_sub.empty:
 #                             return pd.DataFrame(columns=['Outage Date', 'Feeder', 'Diff in Hours', 'Status', 'Duration Bucket'])
-#                         res = df_sub[df_sub['circle_name'] == selected_circle][
-#                             ['outage_date', 'feeder_name', 'duration_minutes', 'status_calc', 'duration_bucket']
-#                         ].rename(columns={
+#                         res = df_sub[df_sub['circle_name'] == selected_circle][[
+#                             'outage_date', 'feeder_name', 'duration_minutes', 'status_calc', 'duration_bucket'
+#                         ]].rename(columns={
 #                             'outage_date':      'Outage Date',
 #                             'feeder_name':      'Feeder',
-#                             'duration_minutes': 'duration_minutes_raw',
+#                             'duration_minutes': '_mins',
 #                             'status_calc':      'Status',
 #                             'duration_bucket':  'Duration Bucket'
 #                         }).copy()
-#                         res['Diff in Hours'] = (res['duration_minutes_raw'] / 60).round(2)
-#                         return res.drop(columns=['duration_minutes_raw'])
+#                         res['Diff in Hours'] = (res['_mins'] / 60).round(2)
+#                         return res.drop(columns=['_mins'])
 
+#                     c_left, c_mid, c_right = st.columns(3)
 #                     with c_left:
 #                         st.markdown("**🔵 Planned Outages**")
 #                         st.dataframe(prep_feeder_df(planned_df).style.apply(highlight_noto, axis=1).format(format_dict).set_table_styles(HEADER_STYLES), width="stretch", hide_index=True)
@@ -1214,7 +1237,6 @@ with tab3:
 #                     with c_right:
 #                         st.markdown("**🔴 Unplanned Outages**")
 #                         st.dataframe(prep_feeder_df(unplanned_df).style.apply(highlight_noto, axis=1).format(format_dict).set_table_styles(HEADER_STYLES), width="stretch", hide_index=True)
-
 
 # # ==========================================
 # # TAB 2: YoY COMPARISON
@@ -1230,17 +1252,15 @@ with tab3:
 #         curr_year_str = str(now_ist.year)
 #         ly_year_str   = str(now_ist.year - 1)
 
-#         df_curr_year = df_master[df_master['start_time'].dt.year == now_ist.year]
-#         df_ly        = df_master[df_master['start_time'].dt.year == (now_ist.year - 1)]
+#         df_curr_year = df_master[pd.to_datetime(df_master['start_time'], errors='coerce').dt.year == now_ist.year]
+#         df_ly        = df_master[pd.to_datetime(df_master['start_time'], errors='coerce').dt.year == (now_ist.year - 1)]
 
 #         # TABLE 1: Selected date range weekly breakdown
 #         st.subheader("🔍 Selected Date Range Weekly Breakdown")
 #         ly_start_d2 = safe_ly_date(start_d2)
 #         ly_end_d2   = safe_ly_date(end_d2)
-
-#         mask_curr = (df_curr_year['outage_date'] >= start_d2)    & (df_curr_year['outage_date'] <= end_d2)
-#         mask_ly   = (df_ly['outage_date']        >= ly_start_d2) & (df_ly['outage_date']        <= ly_end_d2)
-
+#         mask_curr   = (df_curr_year['outage_date'] >= start_d2)    & (df_curr_year['outage_date'] <= end_d2)
+#         mask_ly     = (df_ly['outage_date']        >= ly_start_d2) & (df_ly['outage_date']        <= ly_end_d2)
 #         custom_table = build_weekly_yoy_table(df_curr_year[mask_curr], df_ly[mask_ly], curr_year_str, ly_year_str)
 
 #         if not custom_table.empty:
@@ -1252,23 +1272,20 @@ with tab3:
 #         st.divider()
 
 #         # TABLE 2: YTD auto-growing table
-#         st.subheader(f"📅 Year-to-Date Weekly Trend (Jan 1st - Today)")
-#         ytd_start    = date(now_ist.year, 1, 1)
-#         ytd_end      = now_ist.date()
-#         ly_ytd_start = safe_ly_date(ytd_start)
-#         ly_ytd_end   = safe_ly_date(ytd_end)
-
+#         st.subheader("📅 Year-to-Date Weekly Trend (Jan 1st - Today)")
+#         ytd_start     = date(now_ist.year, 1, 1)
+#         ytd_end       = now_ist.date()
+#         ly_ytd_start  = safe_ly_date(ytd_start)
+#         ly_ytd_end    = safe_ly_date(ytd_end)
 #         mask_ytd_curr = (df_curr_year['outage_date'] >= ytd_start)    & (df_curr_year['outage_date'] <= ytd_end)
 #         mask_ytd_ly   = (df_ly['outage_date']        >= ly_ytd_start) & (df_ly['outage_date']        <= ly_ytd_end)
-
-#         ytd_table = build_weekly_yoy_table(df_curr_year[mask_ytd_curr], df_ly[mask_ytd_ly], curr_year_str, ly_year_str)
+#         ytd_table     = build_weekly_yoy_table(df_curr_year[mask_ytd_curr], df_ly[mask_ytd_ly], curr_year_str, ly_year_str)
 
 #         if not ytd_table.empty:
 #             pct_cols = [c for c in ytd_table.columns if '% Change' in c]
 #             st.dataframe(ytd_table.style.map(style_pct_change, subset=pct_cols).set_table_styles(HEADER_STYLES), width="stretch", hide_index=True)
 #         else:
 #             st.info("No YTD data available.")
-
 
 # # ==========================================
 # # TAB 3: PTW FREQUENCY
@@ -1278,40 +1295,33 @@ with tab3:
 #     start_d3, end_d3 = render_date_selector("tab3")
 #     st.divider()
 
-#     st.markdown("Identifies specific feeders that had a Permit to Work (PTW) taken against them **two or more times** in separate requests over the selected timeframe.")
-
 #     if df_ptw_master.empty:
-#         st.info("No PTW data available.")
+#         st.info("No PTW data available in the current files.")
 #     else:
-#         # Parse date from creation_date column
-#         if 'creation_date' in df_ptw_master.columns:
-#             df_ptw_master['Temp_Date'] = pd.to_datetime(df_ptw_master['creation_date'], errors='coerce').dt.date
-#         else:
-#             date_col = next((c for c in df_ptw_master.columns if 'date' in c.lower() or 'time' in c.lower()), None)
-#             df_ptw_master['Temp_Date'] = pd.to_datetime(df_ptw_master[date_col], errors='coerce').dt.date if date_col else None
-
+#         df_ptw_master['Temp_Date'] = pd.to_datetime(df_ptw_master['creation_date'], errors='coerce').dt.date
 #         mask_ptw     = (df_ptw_master['Temp_Date'] >= start_d3) & (df_ptw_master['Temp_Date'] <= end_d3)
 #         filtered_ptw = df_ptw_master[mask_ptw].copy()
 
 #         if filtered_ptw.empty:
-#             st.warning("⚠️ No PTW data found for the selected time period.")
+#             st.warning("⚠️ No PTW data found for the selected time period. (Note: PTW data is available starting from 1st Jan 2025).")
 #         else:
-#             # Remove cancelled permits
-#             if 'current_status' in filtered_ptw.columns:
-#                 filtered_ptw = filtered_ptw[~filtered_ptw['current_status'].astype(str).str.contains('Cancellation', na=False, case=False)]
+#             # ── Step 1: Remove cancelled permits ──────────────────────────
+#             filtered_ptw = filtered_ptw[
+#                 ~filtered_ptw['current_status'].astype(str).str.contains('Cancellation', na=False, case=False)
+#             ]
 
-#             # Explode feeders (comma-separated string from our CSV)
-#             if 'feeders' in filtered_ptw.columns:
-#                 filtered_ptw['feeders'] = filtered_ptw['feeders'].astype(str).str.split(',')
-#                 filtered_ptw = filtered_ptw.explode('feeders')
-#                 filtered_ptw['feeders'] = filtered_ptw['feeders'].str.strip()
-#                 filtered_ptw = filtered_ptw[filtered_ptw['feeders'] != '']
+#             # ── Step 2: Compute KPI counts BEFORE exploding feeders ───────
+#             total_ptws = filtered_ptw["ptw_id"].nunique()
 
-#             group_cols = ['feeders']
-#             if 'circle_name' in filtered_ptw.columns:
-#                 group_cols.insert(0, 'circle_name')
 
-#             ptw_counts = filtered_ptw.groupby(group_cols).agg(
+#             # ── Step 3: Explode comma-separated feeders ───────────────────
+#             filtered_ptw['feeders'] = filtered_ptw['feeders'].astype(str).str.split(',')
+#             filtered_ptw = filtered_ptw.explode('feeders')
+#             filtered_ptw['feeders'] = filtered_ptw['feeders'].str.strip()
+#             filtered_ptw = filtered_ptw[filtered_ptw['feeders'].str.len() > 0]
+
+#             # ── Step 4: Build repeat feeders table ────────────────────────
+#             ptw_counts = filtered_ptw.groupby(['circle_name', 'feeders']).agg(
 #                 Unique_PTWs=('ptw_id', 'nunique'),
 #                 PTW_IDs=('ptw_id', lambda x: ', '.join(x.dropna().astype(str).unique()))
 #             ).reset_index()
@@ -1326,18 +1336,37 @@ with tab3:
 
 #             if not repeat_feeders.empty:
 #                 gt_dict = {c: '' for c in repeat_feeders.columns}
-#                 gt_dict[repeat_feeders.columns[0]] = 'Grand Total'
+#                 gt_dict['Circle']            = 'Grand Total'
 #                 gt_dict['PTW Request Count'] = int(repeat_feeders['PTW Request Count'].sum())
 #                 repeat_feeders = pd.concat([repeat_feeders, pd.DataFrame([gt_dict])], ignore_index=True)
 
+#             # ── Step 5: KPI Cards ─────────────────────────────────────────
 #             kpi1, kpi2 = st.columns(2)
 #             with kpi1:
-#                 st.markdown(f'<div class="kpi-card"><div><div class="kpi-title">Total Active PTW Requests</div><div class="kpi-value">{filtered_ptw["ptw_id"].nunique()}</div></div><div class="kpi-subtext"><span class="status-badge">Selected Timeframe</span></div></div>', unsafe_allow_html=True)
+#                 st.markdown(
+#                     f'<div class="kpi-card"><div>'
+#                     f'<div class="kpi-title">Total PTW Requests</div>'
+#                     f'<div class="kpi-value">{total_ptws}</div>'
+#                     f'</div><div class="kpi-subtext">'
+#                     f'</div></div>',
+#                     unsafe_allow_html=True
+#                 )
 #             with kpi2:
-#                 st.markdown(f'<div class="kpi-card"><div><div class="kpi-title">Feeders with Multiple PTWs</div><div class="kpi-value">{len(repeat_feeders) - 1 if not repeat_feeders.empty else 0}</div></div><div class="kpi-subtext"><span class="status-badge" style="background-color: #D32F2F;">🔴 Needs Review</span></div></div>', unsafe_allow_html=True)
+#                 multi_count = len(repeat_feeders) - 1 if not repeat_feeders.empty else 0
+#                 st.markdown(
+#                     f'<div class="kpi-card"><div>'
+#                     f'<div class="kpi-title">Feeders with Multiple PTWs</div>'
+#                     f'<div class="kpi-value">{multi_count}</div>'
+#                     f'</div><div class="kpi-subtext">'
+#                     f'<span class="status-badge" style="background-color: #D32F2F;">🔴 Needs Review</span>'
+#                     f'</div></div>',
+#                     unsafe_allow_html=True
+#                 )
 
 #             st.divider()
 #             st.subheader("⚠️ Repeat PTW Feeders Detail View")
+#             st.markdown("Identifies specific feeders that had a Permit to Work (PTW) taken against them **two or more times** in separate requests over the selected timeframe.")
+
 #             if not repeat_feeders.empty:
 #                 st.dataframe(repeat_feeders.style.set_table_styles(HEADER_STYLES), width="stretch", hide_index=True)
 #             else:
