@@ -21,38 +21,37 @@ st.markdown("""
         min-height: 100vh;
     }
 
-    /* Remove streamlit default padding */
     .block-container {
-        padding-top: 2vh !important;
-        padding-bottom: 2vh !important;
-        padding-left: 3vw !important;
-        padding-right: 3vw !important;
+        padding-top: clamp(10px, 2vh, 30px) !important;
+        padding-bottom: clamp(10px, 2vh, 20px) !important;
+        padding-left: clamp(16px, 3vw, 48px) !important;
+        padding-right: clamp(16px, 3vw, 48px) !important;
         max-width: 100% !important;
     }
 
     /* Hero */
     .hero {
         text-align: center;
-        padding: clamp(10px, 2vh, 30px) 20px clamp(6px, 1vh, 20px);
+        padding: clamp(8px, 1.5vh, 24px) 20px clamp(4px, 0.8vh, 12px);
     }
     .hero-badge {
         display: inline-block;
         background: rgba(0, 180, 255, 0.15);
         border: 1px solid rgba(0, 180, 255, 0.4);
         color: #00b4ff;
-        font-size: clamp(0.6rem, 1vw, 0.75rem);
+        font-size: clamp(0.58rem, 0.9vw, 0.72rem);
         font-weight: 600;
         letter-spacing: 2px;
         text-transform: uppercase;
         padding: 5px 16px;
         border-radius: 20px;
-        margin-bottom: clamp(6px, 1vh, 16px);
+        margin-bottom: clamp(6px, 1vh, 14px);
     }
     .hero h1 {
-        font-size: clamp(1.4rem, 4vw, 2.8rem);
+        font-size: clamp(1.5rem, 3.5vw, 2.8rem);
         font-weight: 800;
         color: #ffffff;
-        margin: 0 0 clamp(4px, 0.8vh, 14px);
+        margin: 0;
         letter-spacing: -0.5px;
         line-height: 1.2;
     }
@@ -62,98 +61,67 @@ st.markdown("""
         -webkit-text-fill-color: transparent;
     }
 
-    /* Divider */
     .divider {
         height: 1px;
         background: linear-gradient(90deg, transparent, rgba(0,180,255,0.4), transparent);
-        margin: clamp(4px, 0.8vh, 10px) 40px clamp(8px, 1.5vh, 24px);
+        margin: clamp(6px, 1vh, 14px) 40px clamp(8px, 1.5vh, 20px);
     }
 
-    /* Section label */
     .section-label {
         color: #3d6a8a;
-        font-size: clamp(0.6rem, 1vw, 0.72rem);
+        font-size: clamp(0.58rem, 0.9vw, 0.72rem);
         font-weight: 700;
         letter-spacing: 2.5px;
         text-transform: uppercase;
         text-align: center;
-        margin-bottom: clamp(8px, 1.5vh, 20px);
+        margin-bottom: clamp(8px, 1.5vh, 18px);
     }
 
-    /* Cards */
-    .module-card {
-        background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
-        border: 1px solid rgba(255,255,255,0.1);
-        border-radius: 16px;
-        padding: clamp(18px, 3vh, 36px) clamp(12px, 2vw, 24px);
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-        min-height: clamp(120px, 18vh, 200px);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        backdrop-filter: blur(10px);
-        margin-bottom: clamp(8px, 1.5vh, 16px);
-    }
-    .module-card:hover {
-        border-color: rgba(0, 180, 255, 0.5);
-        background: linear-gradient(145deg, rgba(0,180,255,0.1), rgba(0,114,255,0.05));
-        transform: translateY(-4px);
-        box-shadow: 0 12px 40px rgba(0, 114, 255, 0.2);
-    }
-    .card-icon {
-        font-size: clamp(1.6rem, 3vw, 2.4rem);
-        margin-bottom: clamp(8px, 1.2vh, 14px);
-        filter: drop-shadow(0 0 8px rgba(0,180,255,0.5));
-    }
-    .card-title {
-        color: #e0eaf5;
-        font-size: clamp(0.78rem, 1.4vw, 1rem);
-        font-weight: 600;
-        letter-spacing: 0.2px;
-    }
-    .card-arrow {
-        position: absolute;
-        bottom: 12px; right: 16px;
-        color: rgba(0,180,255,0.4);
-        font-size: 0.9rem;
-        transition: all 0.3s;
-    }
-    .module-card:hover .card-arrow { color: #00b4ff; transform: translateX(3px); }
-
-    /* Streamlit buttons styled to look like "Open" links */
-    .stButton > button {
-        background: transparent !important;
-        border: 1px solid rgba(0,180,255,0.2) !important;
-        color: #3d6a8a !important;
-        font-size: 0.7rem !important;
-        font-weight: 500 !important;
-        border-radius: 8px !important;
-        padding: 4px 0 !important;
-        margin-top: 2px !important;
+    /* THE CARD — styled as a full Streamlit button */
+    div[data-testid="column"] .stButton > button {
+        background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        border-radius: 16px !important;
         width: 100% !important;
-        transition: all 0.2s !important;
-        letter-spacing: 0.5px;
+        height: clamp(140px, 22vh, 240px) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+        padding: clamp(12px, 2vh, 28px) clamp(10px, 2vw, 20px) !important;
+        margin-bottom: clamp(6px, 1vh, 14px) !important;
+        backdrop-filter: blur(10px) !important;
+        color: #e0eaf5 !important;
+        font-family: 'Inter', sans-serif !important;
+        font-size: clamp(0.82rem, 1.3vw, 1rem) !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.2px !important;
+        white-space: normal !important;
+        line-height: 1.4 !important;
+        box-shadow: none !important;
     }
-    .stButton > button:hover {
-        border-color: #00b4ff !important;
-        color: #00b4ff !important;
-        background: rgba(0,180,255,0.05) !important;
+    div[data-testid="column"] .stButton > button:hover {
+        border-color: rgba(0, 180, 255, 0.55) !important;
+        background: linear-gradient(145deg, rgba(0,180,255,0.12), rgba(0,114,255,0.06)) !important;
+        transform: translateY(-4px) !important;
+        box-shadow: 0 12px 36px rgba(0, 114, 255, 0.22) !important;
+        color: #ffffff !important;
+    }
+    div[data-testid="column"] .stButton > button:focus {
+        box-shadow: none !important;
+        outline: none !important;
+        border-color: rgba(0,180,255,0.4) !important;
     }
 
-    /* Column spacing */
-    [data-testid="column"] { padding: 0 clamp(4px, 0.5vw, 10px) !important; }
+    [data-testid="column"] { padding: 0 clamp(4px, 0.6vw, 10px) !important; }
 
-    /* Footer */
     .footer {
         text-align: center;
         color: #2d4a62;
-        font-size: clamp(0.65rem, 1vw, 0.75rem);
-        padding: clamp(8px, 1.5vh, 20px) 20px clamp(4px, 0.8vh, 10px);
+        font-size: clamp(0.62rem, 0.9vw, 0.75rem);
+        padding: clamp(6px, 1vh, 14px) 20px clamp(4px, 0.6vh, 8px);
         letter-spacing: 0.3px;
     }
 </style>
@@ -168,6 +136,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
+st.markdown('<div class="section-label">Operational Modules</div>', unsafe_allow_html=True)
 
 # ── Modules ───────────────────────────────────────────────────────────────────
 modules = [
@@ -179,34 +148,17 @@ modules = [
     {"icon": "⚠️", "title": "Outage Monitoring",            "key": "outage_mon"},
 ]
 
-st.markdown('<div class="section-label">Operational Modules</div>', unsafe_allow_html=True)
-
 cols1 = st.columns(3, gap="medium")
 cols2 = st.columns(3, gap="medium")
 
 for col, mod in zip(cols1, modules[:3]):
     with col:
-        st.markdown(f"""
-        <div class="module-card">
-            <div class="card-icon">{mod['icon']}</div>
-            <div class="card-title">{mod['title']}</div>
-            <div class="card-arrow">→</div>
-        </div>
-        """, unsafe_allow_html=True)
-        if st.button(f"Open →  {mod['title']}", key=mod['key'], use_container_width=True):
+        if st.button(f"{mod['icon']}\n\n{mod['title']}", key=mod['key'], use_container_width=True):
             st.toast(f"🚀 Opening {mod['title']}...", icon="⚡")
 
 for col, mod in zip(cols2, modules[3:]):
     with col:
-        st.markdown(f"""
-        <div class="module-card">
-            <div class="card-icon">{mod['icon']}</div>
-            <div class="card-title">{mod['title']}</div>
-            <div class="card-arrow">→</div>
-        </div>
-        """, unsafe_allow_html=True)
-        if st.button(f"Open →  {mod['title']}", key=mod['key'], use_container_width=True):
+        if st.button(f"{mod['icon']}\n\n{mod['title']}", key=mod['key'], use_container_width=True):
             st.toast(f"🚀 Opening {mod['title']}...", icon="⚡")
 
-# ── Footer ────────────────────────────────────────────────────────────────────
 st.markdown('<div class="footer">Wrought with ❤️ by Jay Joshi</div>', unsafe_allow_html=True)
