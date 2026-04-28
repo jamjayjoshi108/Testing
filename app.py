@@ -23,6 +23,38 @@ st.markdown("""
         min-height: 100vh;
     }
 
+    /* Status dot on cards */
+    .status-dot-green {
+        display: inline-block;
+        width: 8px; height: 8px;
+        background: #00cc66;
+        border-radius: 50%;
+        position: absolute;
+        top: 14px; right: 14px;
+        box-shadow: 0 0 0 0 rgba(0,204,102,0.4);
+        animation: pulseGreen 2s infinite;
+    }
+    .status-dot-red {
+        display: inline-block;
+        width: 8px; height: 8px;
+        background: #ff3b3b;
+        border-radius: 50%;
+        position: absolute;
+        top: 14px; right: 14px;
+        box-shadow: 0 0 0 0 rgba(255,59,59,0.4);
+        animation: pulseRed 2s infinite;
+    }
+    @keyframes pulseGreen {
+        0%   { box-shadow: 0 0 0 0 rgba(0,204,102,0.5); }
+        70%  { box-shadow: 0 0 0 7px rgba(0,204,102,0); }
+        100% { box-shadow: 0 0 0 0 rgba(0,204,102,0); }
+    }
+    @keyframes pulseRed {
+        0%   { box-shadow: 0 0 0 0 rgba(255,59,59,0.5); }
+        70%  { box-shadow: 0 0 0 7px rgba(255,59,59,0); }
+        100% { box-shadow: 0 0 0 0 rgba(255,59,59,0); }
+    }
+
     .block-container {
         padding-top: clamp(10px, 2.5vh, 36px) !important;
         padding-bottom: clamp(10px, 2vh, 24px) !important;
@@ -217,12 +249,12 @@ st.markdown('<div class="section-label">Operational Modules</div>', unsafe_allow
 # ── Modules ───────────────────────────────────────────────────────────────────
 modules = [
     {"icon": "📱", "title": "PTW App",    "page": "ptw"},
-    {"icon": "💡", "title": "Outage Reduction Plan (ORP)", "page": "orp"},
-    {"icon": "🛡️", "title": "RDSS",                        "page": "rdss"},
-    {"icon": "📟", "title": "Smart Meter",                  "page": "smart_meter"},
-    {"icon": "🔌", "title": "New Connections",              "page": "new_conn"},
-    {"icon": "🚨", "title": "Outage Monitoring",            "page": "outage_mon"},
-    {"icon": "🤕", "title": "Consumer Complaints",            "page": "consumer_complaints"}
+    {"icon": "💡", "title": "Outage Reduction Plan (ORP)", "page": "orp",     "status": True},
+    {"icon": "🛡️", "title": "RDSS",                        "page": "rdss",    "status": False},
+    {"icon": "📟", "title": "Smart Meter",                  "page": "smart_meter",     "status": False},
+    {"icon": "🔌", "title": "New Connections",              "page": "new_conn",    "status": False},
+    {"icon": "🚨", "title": "Outage Monitoring",            "page": "outage_mon",    "status": True},
+    {"icon": "🤕", "title": "Consumer Complaints",            "page": "consumer_complaints",    "status": False},
 ]
 
 cols1 = st.columns(3, gap="medium")
@@ -231,8 +263,10 @@ cols3 = st.columns(3, gap="medium")
 
 for i, (col, mod) in enumerate(zip(cols1, modules[:3])):
     with col:
+        dot_class = "status-dot-green" if mod["status"] else "status-dot-red"
         st.markdown(f"""
         <a href="/{mod['page']}" target="_self" class="module-card card-{i}">
+            <span class="{dot_class}"></span>
             <div class="card-icon">{mod['icon']}</div>
             <div class="card-title">{mod['title']}</div>
             <div class="card-arrow">→</div>
@@ -241,8 +275,10 @@ for i, (col, mod) in enumerate(zip(cols1, modules[:3])):
 
 for i, (col, mod) in enumerate(zip(cols2, modules[3:6])):
     with col:
+        dot_class = "status-dot-green" if mod["status"] else "status-dot-red"
         st.markdown(f"""
         <a href="/{mod['page']}" target="_self" class="module-card card-{i+3}">
+            <span class="{dot_class}"></span>
             <div class="card-icon">{mod['icon']}</div>
             <div class="card-title">{mod['title']}</div>
             <div class="card-arrow">→</div>
@@ -251,8 +287,10 @@ for i, (col, mod) in enumerate(zip(cols2, modules[3:6])):
 
 for i, (col, mod) in enumerate(zip(cols3, modules[6:])):
     with col:
+        dot_class = "status-dot-green" if mod["status"] else "status-dot-red"
         st.markdown(f"""
-        <a href="/{mod['page']}" target="_self" class="module-card card-{i+3}">
+        <a href="/{mod['page']}" target="_self" class="module-card card-{i+6}">
+            <span class="{dot_class}"></span>
             <div class="card-icon">{mod['icon']}</div>
             <div class="card-title">{mod['title']}</div>
             <div class="card-arrow">→</div>
