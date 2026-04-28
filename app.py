@@ -97,7 +97,7 @@ def load_data():
                 "outage_status":    "category",
                 "duration_minutes": "float32",
             },
-            parse_dates=["start_time", "supply_restored_time", "created_time"]  # ← end_time → supply_restored_time
+            parse_dates=["start_time", "supply_restored_time", "created_time"]
         )
         df_ptw = pd.read_csv(
             PTW_URL,
@@ -108,7 +108,7 @@ def load_data():
                 "circle_name":    "category",
                 "current_status": "category",
             },
-            parse_dates=["creation_date", "start_time", "end_time"]  # ← added start_time + end_time
+            parse_dates=["creation_date", "start_time", "end_time"]
         )
     return df_outages, df_ptw
 
@@ -130,17 +130,19 @@ def clean_outage_data(df):
 
     # ── Recalculate duration using start_time → supply_restored_time ──
     if 'start_time' in df.columns and 'supply_restored_time' in df.columns:
-        df['start_time']            = pd.to_datetime(df['start_time'],            errors='coerce')
-        df['supply_restored_time']  = pd.to_datetime(df['supply_restored_time'],  errors='coerce')
+        # Strip timezone from both columns to avoid tz mismatch errors
+        df['start_time']           = pd.to_datetime(df['start_time'],           errors='coerce').dt.tz_localize(None)
+        df['supply_restored_time'] = pd.to_datetime(df['supply_restored_time'], errors='coerce').dt.tz_localize(None)
 
-        # Where supply_restored_time is missing → outage is still ongoing → use now as end time
-        effective_end = df['supply_restored_time'].fillna(datetime.now(IST).replace(tzinfo=None))
+        # Where supply_restored_time is missing → outage still ongoing → use now as end
+        now_naive     = pd.Timestamp.now()
+        effective_end = df['supply_restored_time'].fillna(now_naive)
 
         df['duration_minutes'] = (
             (effective_end - df['start_time'])
             .dt.total_seconds()
             .div(60)
-            .clip(lower=0)          # no negative durations
+            .clip(lower=0)
             .round(2)
         )
 
@@ -148,7 +150,6 @@ def clean_outage_data(df):
         df['is_ongoing'] = df['supply_restored_time'].isna()
 
     elif 'duration_minutes' in df.columns:
-        # Fallback if supply_restored_time column doesn't exist
         df['duration_minutes'] = pd.to_numeric(df['duration_minutes'], errors='coerce').fillna(0)
         df['is_ongoing'] = False
 
@@ -416,16 +417,6 @@ with tab1:
         filtered_tab1 = df_master[mask_t1].copy()
     else:
         filtered_tab1 = pd.DataFrame()
-    # ── TEMPORARY DEBUG: inspect specific feeder ─────────────────
-    st.warning("🛠️ DEBUG — All Tarn Taran Planned Outages")
-    debug_feeder = filtered_tab1[
-        filtered_tab1['circle_name'].astype(str).str.upper().str.contains('TARN', na=False)
-    ][['zone_name', 'circle_name', 'feeder_name', 'outage_type', 'start_time', 'end_time', 'duration_minutes', 'status_calc']]
-    st.dataframe(debug_feeder, use_container_width=True)
-    
-    st.warning("🛠️ DEBUG — All unique circle names in filtered data")
-    st.write(sorted(filtered_tab1['circle_name'].dropna().unique().tolist()))
-    # ── END DEBUG ─────────────────────────────────────────────────
 
     if filtered_tab1.empty:
         st.info("No outage data found for the selected time period.")
@@ -433,8 +424,6 @@ with tab1:
         planned_df   = filtered_tab1[filtered_tab1['outage_type'] == 'Planned Outage']
         pc_df        = filtered_tab1[filtered_tab1['outage_type'] == 'Power Off By PC']
         unplanned_df = filtered_tab1[filtered_tab1['outage_type'] == 'Unplanned Outage']
-
-
 
         # --- KPI WIDGETS ---
         kpi1, kpi2, kpi3 = st.columns(3)
@@ -530,6 +519,8 @@ with tab1:
         else:
             st.info("No data available for the selected outage type/range.")
 
+        st.divider()
+
         # --- CIRCLE-WISE BREAKDOWN & DRILLDOWN ---
         st.subheader("🔌 Comprehensive Circle-wise Breakdown")
         st.markdown(" **Click on any row inside the table below** to view the specific Feeder drill-down details.")
@@ -567,11 +558,11 @@ with tab1:
                     def prep_feeder_df(df_sub):
                         if df_sub.empty:
                             return pd.DataFrame(columns=['Outage Date', 'Feeder', 'Start Time', 'End Time', 'Diff in Hours', 'Ongoing?', 'Status', 'Duration Bucket'])
-                        
+
                         cols = ['outage_date', 'feeder_name', 'start_time', 'supply_restored_time',
                                 'duration_minutes', 'is_ongoing', 'status_calc', 'duration_bucket']
-                        cols = [c for c in cols if c in df_sub.columns]  # only include what exists
-                        
+                        cols = [c for c in cols if c in df_sub.columns]
+
                         res = df_sub[df_sub['circle_name'] == selected_circle][cols].rename(columns={
                             'outage_date':           'Outage Date',
                             'feeder_name':           'Feeder',
@@ -596,154 +587,130 @@ with tab1:
                     with c_right:
                         st.markdown("**🔴 Unplanned Outages**")
                         st.dataframe(prep_feeder_df(unplanned_df).style.apply(highlight_noto, axis=1).format(format_dict).set_table_styles(HEADER_STYLES), width="stretch", hide_index=True)
-                    st.divider()
-            st.subheader("📋 Circle-wise Outage Summary (> 4 Hours)")
-            st.caption("Showing feeders with outage duration **> 4 hours** only, excluding cancelled outages.")
-            
-            if not filtered_tab1.empty:
-            
-                # ── Shared filter function ────────────────────────────────────────
-                def apply_base_filter(df):
-                    return df[
-                        (df['duration_minutes'] > 240) &
-                        (~df['status_calc'].astype(str).str.upper().isin(['CANCELLED', 'CANCEL']))
-                    ].copy()
-            
-                # ── TABLE BUILDER: Circle-wise summary ───────────────────────────
-                def build_circle_summary(df, label):
-                    source = apply_base_filter(df)
-                    if source.empty:
-                        st.info(f"No {label} outages longer than 4 hours.")
-                        return
-            
-                    summary = source.groupby('circle_name').agg(
-                        Total_Feeders_With_Outages=('feeder_name', 'nunique'),
-                        Avg_Outage_Duration_Hrs=('duration_minutes', lambda x: round(pd.to_numeric(x, errors='coerce').mean() / 60, 2))
-                    ).reset_index()
-            
-                    summary.rename(columns={
-                        'circle_name':                'Circle',
-                        'Total_Feeders_With_Outages': 'Total Feeders with Outages',
-                        'Avg_Outage_Duration_Hrs':    'Avg Outage Duration (Hrs)'
-                    }, inplace=True)
-            
-                    summary = summary.sort_values('Circle').reset_index(drop=True)
-            
-                    gt = {
-                        'Circle':                     'Grand Total',
-                        'Total Feeders with Outages': source['feeder_name'].nunique(),
-                        'Avg Outage Duration (Hrs)':  round(pd.to_numeric(source['duration_minutes'], errors='coerce').mean() / 60, 2)
-                    }
-                    summary = pd.concat([summary, pd.DataFrame([gt])], ignore_index=True)
-                    data_rows = summary.index[summary['Circle'] != 'Grand Total']
-                    cmap = 'Blues' if 'Planned' in label else ('Reds' if 'Unplanned' in label else 'Purples')
-            
-                    def style_summary(df):
-                        styler = df.style
-                        styler = styler.background_gradient(subset=pd.IndexSlice[data_rows, ['Total Feeders with Outages']], cmap=cmap, vmin=0)
-                        styler = styler.background_gradient(subset=pd.IndexSlice[data_rows, ['Avg Outage Duration (Hrs)']], cmap='Oranges', vmin=0)
-                        def bold_grand_total(row):
-                            if row['Circle'] == 'Grand Total':
-                                return ['font-weight: bold; background-color: #004085; color: #FFC107;'] * len(row)
-                            return [''] * len(row)
-                        styler = styler.apply(bold_grand_total, axis=1)
-                        styler = styler.format({'Total Feeders with Outages': '{:,}', 'Avg Outage Duration (Hrs)': '{:.2f}'})
-                        styler = styler.set_table_styles(HEADER_STYLES)
-                        return styler
-            
-                    st.dataframe(style_summary(summary), use_container_width=True, hide_index=True)
-            
-                # ── TABLE BUILDER: Feeder-level drill-down ────────────────────────
-                def build_feeder_drilldown(df, label, cmap_zone):
-                    source = apply_base_filter(df)
-                    if source.empty:
-                        st.info(f"No {label} feeder-level detail available.")
-                        return
-            
-                    # Select and rename columns to match: Zone, Circle, Division, S/D, Feeder, Hours
-                    cols_needed = ['zone_name', 'circle_name', 'feeder_name', 'duration_minutes']
-            
-                    # Include division and s/d columns only if they exist in the data
-                    if 'division_name' in source.columns:
-                        cols_needed.insert(2, 'division_name')
-                    if 'substation_name' in source.columns:
-                        cols_needed.insert(3, 'substation_name')
-            
-                    detail = source[cols_needed].copy()
-                    detail['Hours'] = (detail['duration_minutes'] / 60).round(2)
-                    detail = detail.drop(columns=['duration_minutes'])
-            
-                    rename_map = {
-                        'zone_name':       'Zone',
-                        'circle_name':     'Circle',
-                        'feeder_name':     'Feeder',
-                    }
-                    if 'division_name'   in detail.columns: rename_map['division_name']   = 'Division'
-                    if 'substation_name' in detail.columns: rename_map['substation_name'] = 'S/D'
-            
-                    detail = detail.rename(columns=rename_map)
-                    detail = detail.sort_values(['Zone', 'Circle', 'Hours'], ascending=[True, True, False]).reset_index(drop=True)
-            
-                    # Grand Total row
-                    gt_row = {c: '' for c in detail.columns}
-                    gt_row['Zone']  = 'Grand Total'
-                    gt_row['Hours'] = round(detail['Hours'].sum(), 2)
-                    detail = pd.concat([detail, pd.DataFrame([gt_row])], ignore_index=True)
-            
-                    data_rows = detail.index[detail['Zone'] != 'Grand Total']
-            
-                    # Assign a unique colour per Zone for row-level highlighting
-                    unique_zones = detail.loc[data_rows, 'Zone'].unique().tolist()
-                    zone_cmaps   = ['#EBF5FB', '#EAF4E8', '#FEF9E7', '#F5EEF8', '#FDFEFE', '#FEF5E7', '#E8F8F5', '#FDEDEC']
-                    zone_color_map = {zone: zone_cmaps[i % len(zone_cmaps)] for i, zone in enumerate(unique_zones)}
-            
-                    def color_by_zone(row):
-                        if row['Zone'] == 'Grand Total':
-                            return ['font-weight: bold; background-color: #004085; color: #FFC107;'] * len(row)
-                        color = zone_color_map.get(row['Zone'], '#FFFFFF')
-                        return [f'background-color: {color};'] * len(row)
-            
-                    def style_drilldown(df):
-                        styler = df.style
-                        styler = styler.apply(color_by_zone, axis=1)
-                        styler = styler.format({'Hours': '{:.2f}'}, na_rep='')
-                        styler = styler.set_table_styles(HEADER_STYLES)
-                        return styler
-            
-                    st.dataframe(style_drilldown(detail), use_container_width=True, hide_index=True)
-            
-                # ════════════════════════════════════════════════════════════════
-                # SECTION A: Circle-wise Summary Tables
-                # ════════════════════════════════════════════════════════════════
-                st.markdown("**🔵 Planned Outages**")
-                build_circle_summary(planned_df, "Planned Outage")
-            
-                st.markdown("**🔴 Unplanned Outages**")
-                build_circle_summary(unplanned_df, "Unplanned Outage")
-            
-                st.markdown("**🟣 Power Off By PC**")
-                build_circle_summary(pc_df, "Power Off By PC")
-            
-                # ════════════════════════════════════════════════════════════════
-                # SECTION B: Feeder-level Drill-down Tables (Zone → Feeder → Hours)
-                # ════════════════════════════════════════════════════════════════
-                st.divider()
-                st.subheader("🔍 Feeder-level Detail (> 4 Hours)")
-                st.caption("Each feeder row shows Zone → Circle → Division → S/D → Feeder → Hours. Color-coded by Zone.")
-            
-                st.markdown("**🔵 Planned Outages — Feeder Detail**")
-                build_feeder_drilldown(planned_df, "Planned Outage", 'Blues')
-            
-                st.markdown("**🔴 Unplanned Outages — Feeder Detail**")
-                build_feeder_drilldown(unplanned_df, "Unplanned Outage", 'Reds')
-            
-                st.markdown("**🟣 Power Off By PC — Feeder Detail**")
-                build_feeder_drilldown(pc_df, "Power Off By PC", 'Purples')
-            
-            else:
-                st.info("No data available to build the outage summary.")
 
+        st.divider()
 
+        # --- CIRCLE-WISE OUTAGE SUMMARY (> 4 HOURS) ---
+        st.subheader("📋 Circle-wise Outage Summary (> 4 Hours)")
+        st.caption("Showing feeders with outage duration **> 4 hours** only, excluding cancelled outages.")
+
+        def apply_base_filter(df):
+            return df[
+                (df['duration_minutes'] > 240) &
+                (~df['status_calc'].astype(str).str.upper().isin(['CANCELLED', 'CANCEL']))
+            ].copy()
+
+        def build_circle_summary(df, label):
+            source = apply_base_filter(df)
+            if source.empty:
+                st.info(f"No {label} outages longer than 4 hours.")
+                return
+
+            summary = source.groupby('circle_name').agg(
+                Total_Feeders_With_Outages=('feeder_name', 'nunique'),
+                Avg_Outage_Duration_Hrs=('duration_minutes', lambda x: round(pd.to_numeric(x, errors='coerce').mean() / 60, 2))
+            ).reset_index()
+
+            summary.rename(columns={
+                'circle_name':                'Circle',
+                'Total_Feeders_With_Outages': 'Total Feeders with Outages',
+                'Avg_Outage_Duration_Hrs':    'Avg Outage Duration (Hrs)'
+            }, inplace=True)
+
+            summary = summary.sort_values('Circle').reset_index(drop=True)
+
+            gt = {
+                'Circle':                     'Grand Total',
+                'Total Feeders with Outages': source['feeder_name'].nunique(),
+                'Avg Outage Duration (Hrs)':  round(pd.to_numeric(source['duration_minutes'], errors='coerce').mean() / 60, 2)
+            }
+            summary = pd.concat([summary, pd.DataFrame([gt])], ignore_index=True)
+            data_rows = summary.index[summary['Circle'] != 'Grand Total']
+            cmap = 'Blues' if 'Planned' in label else ('Reds' if 'Unplanned' in label else 'Purples')
+
+            def style_summary(df):
+                styler = df.style
+                styler = styler.background_gradient(subset=pd.IndexSlice[data_rows, ['Total Feeders with Outages']], cmap=cmap, vmin=0)
+                styler = styler.background_gradient(subset=pd.IndexSlice[data_rows, ['Avg Outage Duration (Hrs)']], cmap='Oranges', vmin=0)
+                def bold_grand_total(row):
+                    if row['Circle'] == 'Grand Total':
+                        return ['font-weight: bold; background-color: #004085; color: #FFC107;'] * len(row)
+                    return [''] * len(row)
+                styler = styler.apply(bold_grand_total, axis=1)
+                styler = styler.format({'Total Feeders with Outages': '{:,}', 'Avg Outage Duration (Hrs)': '{:.2f}'})
+                styler = styler.set_table_styles(HEADER_STYLES)
+                return styler
+
+            st.dataframe(style_summary(summary), use_container_width=True, hide_index=True)
+
+        def build_feeder_drilldown(df, label, cmap_zone):
+            source = apply_base_filter(df)
+            if source.empty:
+                st.info(f"No {label} feeder-level detail available.")
+                return
+
+            cols_needed = ['zone_name', 'circle_name', 'feeder_name', 'duration_minutes']
+            if 'division_name'   in source.columns: cols_needed.insert(2, 'division_name')
+            if 'substation_name' in source.columns: cols_needed.insert(3, 'substation_name')
+
+            detail = source[cols_needed].copy()
+            detail['Hours'] = (detail['duration_minutes'] / 60).round(2)
+            detail = detail.drop(columns=['duration_minutes'])
+
+            rename_map = {'zone_name': 'Zone', 'circle_name': 'Circle', 'feeder_name': 'Feeder'}
+            if 'division_name'   in detail.columns: rename_map['division_name']   = 'Division'
+            if 'substation_name' in detail.columns: rename_map['substation_name'] = 'S/D'
+
+            detail = detail.rename(columns=rename_map)
+            detail = detail.sort_values(['Zone', 'Circle', 'Hours'], ascending=[True, True, False]).reset_index(drop=True)
+
+            gt_row = {c: '' for c in detail.columns}
+            gt_row['Zone']  = 'Grand Total'
+            gt_row['Hours'] = round(detail['Hours'].sum(), 2)
+            detail = pd.concat([detail, pd.DataFrame([gt_row])], ignore_index=True)
+
+            data_rows    = detail.index[detail['Zone'] != 'Grand Total']
+            unique_zones = detail.loc[data_rows, 'Zone'].unique().tolist()
+            zone_cmaps   = ['#EBF5FB', '#EAF4E8', '#FEF9E7', '#F5EEF8', '#FDFEFE', '#FEF5E7', '#E8F8F5', '#FDEDEC']
+            zone_color_map = {zone: zone_cmaps[i % len(zone_cmaps)] for i, zone in enumerate(unique_zones)}
+
+            def color_by_zone(row):
+                if row['Zone'] == 'Grand Total':
+                    return ['font-weight: bold; background-color: #004085; color: #FFC107;'] * len(row)
+                return [f'background-color: {zone_color_map.get(row["Zone"], "#FFFFFF")};'] * len(row)
+
+            def style_drilldown(df):
+                styler = df.style
+                styler = styler.apply(color_by_zone, axis=1)
+                styler = styler.format({'Hours': '{:.2f}'}, na_rep='')
+                styler = styler.set_table_styles(HEADER_STYLES)
+                return styler
+
+            st.dataframe(style_drilldown(detail), use_container_width=True, hide_index=True)
+
+        # SECTION A: Circle-wise Summary Tables
+        st.markdown("**🔵 Planned Outages**")
+        build_circle_summary(planned_df, "Planned Outage")
+
+        st.markdown("**🔴 Unplanned Outages**")
+        build_circle_summary(unplanned_df, "Unplanned Outage")
+
+        st.markdown("**🟣 Power Off By PC**")
+        build_circle_summary(pc_df, "Power Off By PC")
+
+        # SECTION B: Feeder-level Drill-down
+        st.divider()
+        st.subheader("🔍 Feeder-level Detail (> 4 Hours)")
+        st.caption("Each feeder row shows Zone → Circle → Feeder → Hours. Color-coded by Zone.")
+
+        st.markdown("**🔵 Planned Outages — Feeder Detail**")
+        build_feeder_drilldown(planned_df, "Planned Outage", 'Blues')
+
+        st.markdown("**🔴 Unplanned Outages — Feeder Detail**")
+        build_feeder_drilldown(unplanned_df, "Unplanned Outage", 'Reds')
+
+        st.markdown("**🟣 Power Off By PC — Feeder Detail**")
+        build_feeder_drilldown(pc_df, "Power Off By PC", 'Purples')
 
 # ==========================================
 # TAB 2: YoY COMPARISON
@@ -762,7 +729,6 @@ with tab2:
         df_curr_year = df_master[pd.to_datetime(df_master['start_time'], errors='coerce').dt.year == now_ist.year]
         df_ly        = df_master[pd.to_datetime(df_master['start_time'], errors='coerce').dt.year == (now_ist.year - 1)]
 
-        # TABLE 1: Selected date range weekly breakdown
         st.subheader("🔍 Selected Date Range Weekly Breakdown")
         ly_start_d2 = safe_ly_date(start_d2)
         ly_end_d2   = safe_ly_date(end_d2)
@@ -778,7 +744,6 @@ with tab2:
 
         st.divider()
 
-        # TABLE 2: YTD auto-growing table
         st.subheader("📅 Year-to-Date Weekly Trend (Jan 1st - Today)")
         ytd_start     = date(now_ist.year, 1, 1)
         ytd_end       = now_ist.date()
@@ -812,22 +777,21 @@ with tab3:
         if filtered_ptw.empty:
             st.warning("⚠️ No PTW data found for the selected time period. (Note: PTW data is available starting from 1st Jan 2025).")
         else:
-            # ── Step 1: Remove cancelled permits ──────────────────────────
+            # Remove cancelled permits
             filtered_ptw = filtered_ptw[
                 ~filtered_ptw['current_status'].astype(str).str.contains('Cancellation', na=False, case=False)
             ]
 
-            # ── Step 2: Compute KPI counts BEFORE exploding feeders ───────
+            # KPI counts BEFORE exploding feeders
             total_ptws = filtered_ptw["ptw_id"].nunique()
 
-
-            # ── Step 3: Explode comma-separated feeders ───────────────────
+            # Explode comma-separated feeders
             filtered_ptw['feeders'] = filtered_ptw['feeders'].astype(str).str.split(',')
             filtered_ptw = filtered_ptw.explode('feeders')
             filtered_ptw['feeders'] = filtered_ptw['feeders'].str.strip()
             filtered_ptw = filtered_ptw[filtered_ptw['feeders'].str.len() > 0]
 
-            # ── Step 4: Build repeat feeders table ────────────────────────
+            # Build repeat feeders table
             ptw_counts = filtered_ptw.groupby(['circle_name', 'feeders']).agg(
                 Unique_PTWs=('ptw_id', 'nunique'),
                 PTW_IDs=('ptw_id', lambda x: ', '.join(x.dropna().astype(str).unique()))
@@ -847,15 +811,15 @@ with tab3:
                 gt_dict['PTW Request Count'] = int(repeat_feeders['PTW Request Count'].sum())
                 repeat_feeders = pd.concat([repeat_feeders, pd.DataFrame([gt_dict])], ignore_index=True)
 
-            # ── Step 5: KPI Cards ─────────────────────────────────────────
+            # KPI Cards
             kpi1, kpi2 = st.columns(2)
-            with kpi1:                
+            with kpi1:
                 st.markdown(
                     f'<div class="kpi-card"><div>'
                     f'<div class="kpi-title">Total PTW Requests</div>'
                     f'<div class="kpi-value">{total_ptws}</div>'
                     f'</div><div class="kpi-subtext">'
-                    f'<span class="status-badge"> </span>'
+                    f'<span class="status-badge">📅 Selected Timeframe</span>'
                     f'</div></div>',
                     unsafe_allow_html=True
                 )
@@ -879,8 +843,6 @@ with tab3:
                 st.dataframe(repeat_feeders.style.set_table_styles(HEADER_STYLES), width="stretch", hide_index=True)
             else:
                 st.success("No feeders had multiple PTWs requested against them in the selected timeframe! 🎉")
-
-
 
 # #================================================================================================================================
 # V1
