@@ -20,14 +20,6 @@ st.markdown("""
 
 st.markdown("""
 <style>
-    .block-container { padding-top: 1.5rem; padding-bottom: 1.5rem; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    p, span, div, caption, .stMarkdown { color: #000000 !important; }
-    h1, h2, h3, h4, h5, h6 { color: #004085 !important; font-weight: 700 !important; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    div.block-container h1 { text-align: center; border-bottom: 3px solid #004085 !important; padding-bottom: 10px; margin-bottom: 30px !important; font-size: 2.2rem !important; }
-    h2 { font-size: 1.3rem !important; border-bottom: 2px solid #004085 !important; padding-bottom: 5px; margin-bottom: 10px !important; }
-    h3 { font-size: 1.05rem !important; margin-bottom: 12px !important; text-transform: uppercase; letter-spacing: 0.5px; }
-    hr { border: 0; border-top: 1px solid #004085; margin: 1.5rem 0; opacity: 0.3; }
-
     .kpi-card {
         background: linear-gradient(135deg, #004481 0%, #0066cc 100%);
         border-radius: 6px;
@@ -35,31 +27,63 @@ st.markdown("""
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        height: 100%;
+        /* height: 100%;  ← REMOVE THIS, causes overlap */
+        min-height: 130px;             /* consistent height without overflow */
         box-shadow: 0 2px 4px rgba(0,0,0,0.08);
         transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
         border: 1px solid #003366;
+        margin-bottom: 0;              /* let st.columns gap handle spacing */
     }
     .kpi-card:hover { transform: translateY(-4px); box-shadow: 0 8px 16px rgba(0,68,129,0.2); }
     .kpi-title { color: #FFC107 !important; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.4rem; }
     .kpi-value { color: #FFFFFF !important; font-weight: 700; font-size: 2.6rem; margin-bottom: 0; line-height: 1.1; }
-    .kpi-subtext { color: #F8F9FA !important; font-size: 0.85rem; margin-top: 1rem; padding-top: 0.6rem; border-top: 1px solid rgba(255,255,255,0.2); display: flex; justify-content: flex-start; gap: 15px; }
+    .kpi-subtext { color: #F8F9FA !important; font-size: 0.85rem; margin-top: 0.8rem; padding-top: 0.6rem; border-top: 1px solid rgba(255,255,255,0.2); display: flex; justify-content: flex-start; gap: 15px; }
     .status-badge { background-color: rgba(0,0,0,0.25); padding: 3px 8px; border-radius: 4px; font-weight: 500; color: #FFFFFF !important; }
-
-    [data-testid="stDataFrame"] > div { border: 2px solid #004085 !important; border-radius: 6px; overflow: hidden; }
-
-    div[data-testid="stButton"] > button[kind="secondary"] {
-        background: #ffffff; border: 1.5px solid rgba(0,102,204,0.2); color: #0066cc;
-        font-size: 0.82rem; font-weight: 600; padding: 8px 20px; border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0,102,204,0.08); transition: all 0.2s ease;
-        font-family: 'Inter', sans-serif; margin-bottom: 16px;
-    }
-    div[data-testid="stButton"] > button[kind="secondary"]:hover {
-        background: #0066cc; color: #ffffff; border-color: #0066cc;
-        box-shadow: 0 4px 16px rgba(0,102,204,0.2);
-    }
 </style>
 """, unsafe_allow_html=True)
+
+# st.markdown("""
+# <style>
+#     .block-container { padding-top: 1.5rem; padding-bottom: 1.5rem; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+#     p, span, div, caption, .stMarkdown { color: #000000 !important; }
+#     h1, h2, h3, h4, h5, h6 { color: #004085 !important; font-weight: 700 !important; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+#     div.block-container h1 { text-align: center; border-bottom: 3px solid #004085 !important; padding-bottom: 10px; margin-bottom: 30px !important; font-size: 2.2rem !important; }
+#     h2 { font-size: 1.3rem !important; border-bottom: 2px solid #004085 !important; padding-bottom: 5px; margin-bottom: 10px !important; }
+#     h3 { font-size: 1.05rem !important; margin-bottom: 12px !important; text-transform: uppercase; letter-spacing: 0.5px; }
+#     hr { border: 0; border-top: 1px solid #004085; margin: 1.5rem 0; opacity: 0.3; }
+
+#     .kpi-card {
+#         background: linear-gradient(135deg, #004481 0%, #0066cc 100%);
+#         border-radius: 6px;
+#         padding: 1.2rem 1.2rem;
+#         display: flex;
+#         flex-direction: column;
+#         justify-content: space-between;
+#         height: 100%;
+#         box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+#         transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+#         border: 1px solid #003366;
+#     }
+#     .kpi-card:hover { transform: translateY(-4px); box-shadow: 0 8px 16px rgba(0,68,129,0.2); }
+#     .kpi-title { color: #FFC107 !important; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.4rem; }
+#     .kpi-value { color: #FFFFFF !important; font-weight: 700; font-size: 2.6rem; margin-bottom: 0; line-height: 1.1; }
+#     .kpi-subtext { color: #F8F9FA !important; font-size: 0.85rem; margin-top: 1rem; padding-top: 0.6rem; border-top: 1px solid rgba(255,255,255,0.2); display: flex; justify-content: flex-start; gap: 15px; }
+#     .status-badge { background-color: rgba(0,0,0,0.25); padding: 3px 8px; border-radius: 4px; font-weight: 500; color: #FFFFFF !important; }
+
+#     [data-testid="stDataFrame"] > div { border: 2px solid #004085 !important; border-radius: 6px; overflow: hidden; }
+
+#     div[data-testid="stButton"] > button[kind="secondary"] {
+#         background: #ffffff; border: 1.5px solid rgba(0,102,204,0.2); color: #0066cc;
+#         font-size: 0.82rem; font-weight: 600; padding: 8px 20px; border-radius: 10px;
+#         box-shadow: 0 2px 8px rgba(0,102,204,0.08); transition: all 0.2s ease;
+#         font-family: 'Inter', sans-serif; margin-bottom: 16px;
+#     }
+#     div[data-testid="stButton"] > button[kind="secondary"]:hover {
+#         background: #0066cc; color: #ffffff; border-color: #0066cc;
+#         box-shadow: 0 4px 16px rgba(0,102,204,0.2);
+#     }
+# </style>
+# """, unsafe_allow_html=True)
 
 HEADER_STYLES = [
     {'selector': 'th',     'props': [('background-color','#004085 !important'),('color','#FFC107 !important'),('font-weight','bold !important'),('text-align','center !important')]},
@@ -255,6 +279,7 @@ avg_dur_str        = f"{avg_duration:.1f} hrs" if not pd.isna(avg_duration) else
 st.subheader(f"📊 Global Performance ({start_date.strftime('%d %b')} to {end_date.strftime('%d %b %Y')})")
 
 kpi1, kpi2, kpi3 = st.columns(3)
+st.write("")
 with kpi1:
     st.markdown(
         f'<div class="kpi-card"><div>'
