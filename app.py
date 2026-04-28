@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone, date
 # ─────────────────────────────────────────────────────────────
 # PAGE CONFIGURATION
 # ─────────────────────────────────────────────────────────────
-st.set_page_config(page_title="Power Outage Monitoring Dashboard jjj", layout="wide")
+st.set_page_config(page_title="Power Outage Monitoring Dashboard", layout="wide")
 
 # ─────────────────────────────────────────────────────────────
 # GLOBAL TABLE HEADER STYLING
@@ -368,7 +368,7 @@ def render_date_selector(tab_key):
 # ─────────────────────────────────────────────────────────────
 # MAIN DASHBOARD
 # ─────────────────────────────────────────────────────────────
-st.title("⚡ Power Outage Monitoring Dashboard")
+st.title("⚡ Power Outage Monitoring Dashboard jjj")
 tab1, tab2, tab3 = st.tabs(["📊 Dashboard", "📈 YoY Comparison", "🛠️ PTW Frequency"])
 
 # ==========================================
