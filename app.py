@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 
 st.set_page_config(
     page_title="Utility Operations Command Center",
@@ -17,7 +18,6 @@ st.markdown("""
 
     #MainMenu, footer, header { visibility: hidden; }
 
-    /* Cream/white professional background */
     .stApp {
         background: linear-gradient(145deg, #f8f9fb 0%, #eef1f7 50%, #f4f6fa 100%);
         min-height: 100vh;
@@ -109,10 +109,9 @@ st.markdown("""
         justify-content: center;
         box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
         margin-bottom: clamp(8px, 1.4vh, 18px);
-        /* staggered entrance animation handled inline */
+        text-decoration: none;
     }
 
-    /* Shimmer top border on hover */
     .module-card::before {
         content: '';
         position: absolute;
@@ -132,7 +131,6 @@ st.markdown("""
         box-shadow: 0 16px 40px rgba(0, 102, 204, 0.14);
     }
 
-    /* Card entrance animations */
     .card-0 { animation: cardIn 0.5s ease 0.1s both; }
     .card-1 { animation: cardIn 0.5s ease 0.2s both; }
     .card-2 { animation: cardIn 0.5s ease 0.3s both; }
@@ -175,15 +173,8 @@ st.markdown("""
         transform: translateX(4px);
     }
 
-    /* Hide Streamlit button under each card */
-    div[data-testid="column"] .stButton > button {
-        display: none !important;
-    }
-
-    /* Column spacing */
     [data-testid="column"] { padding: 0 clamp(4px, 0.5vw, 10px) !important; }
 
-    /* Footer */
     .footer {
         text-align: center;
         color: #b0bdd0;
@@ -193,7 +184,6 @@ st.markdown("""
         animation: fadeSlideDown 1.2s ease both;
     }
 
-    /* Pulse dot */
     .pulse-dot {
         display: inline-block;
         width: 7px; height: 7px;
@@ -225,12 +215,12 @@ st.markdown('<div class="section-label">Operational Modules</div>', unsafe_allow
 
 # ── Modules ───────────────────────────────────────────────────────────────────
 modules = [
-    {"icon": "🔐", "title": "PTW, LM-ALM Application",    "key": "ptw"},
-    {"icon": "📉", "title": "Outage Reduction Plan (ORP)", "key": "orp"},
-    {"icon": "🛡️", "title": "RDSS",                        "key": "rdss"},
-    {"icon": "📟", "title": "Smart Meter",                  "key": "smart_meter"},
-    {"icon": "🔌", "title": "New Connections",              "key": "new_conn"},
-    {"icon": "⚠️", "title": "Outage Monitoring",            "key": "outage_mon"},
+    {"icon": "🔐", "title": "PTW, LM-ALM Application",    "page": "ptw"},
+    {"icon": "📉", "title": "Outage Reduction Plan (ORP)", "page": "orp"},
+    {"icon": "🛡️", "title": "RDSS",                        "page": "rdss"},
+    {"icon": "📟", "title": "Smart Meter",                  "page": "smart_meter"},
+    {"icon": "🔌", "title": "New Connections",              "page": "new_conn"},
+    {"icon": "⚠️", "title": "Outage Monitoring",            "page": "outage_mon"},
 ]
 
 cols1 = st.columns(3, gap="medium")
@@ -239,25 +229,22 @@ cols2 = st.columns(3, gap="medium")
 for i, (col, mod) in enumerate(zip(cols1, modules[:3])):
     with col:
         st.markdown(f"""
-        <div class="module-card card-{i}">
+        <a href="/{mod['page']}" target="_self" class="module-card card-{i}">
             <div class="card-icon">{mod['icon']}</div>
             <div class="card-title">{mod['title']}</div>
             <div class="card-arrow">→</div>
-        </div>
+        </a>
         """, unsafe_allow_html=True)
-        if st.button("_", key=mod['key'], use_container_width=True):
-            st.toast(f"🚀 Opening {mod['title']}...", icon="⚡")
 
 for i, (col, mod) in enumerate(zip(cols2, modules[3:])):
     with col:
         st.markdown(f"""
-        <div class="module-card card-{i+3}">
+        <a href="/{mod['page']}" target="_self" class="module-card card-{i+3}">
             <div class="card-icon">{mod['icon']}</div>
             <div class="card-title">{mod['title']}</div>
             <div class="card-arrow">→</div>
-        </div>
+        </a>
         """, unsafe_allow_html=True)
-        
 
 # ── Footer ────────────────────────────────────────────────────────────────────
 st.markdown('<div class="footer">Wrought with ❤️ by Jay Joshi</div>', unsafe_allow_html=True)
