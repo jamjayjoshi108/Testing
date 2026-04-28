@@ -213,5 +213,33 @@ def render_ptw_lm_dashboard():
         </style>
     """, unsafe_allow_html=True)
 
+    # ── Back Button ──────────────────────────────────────────────────────────────
+st.markdown("""
+<style>
+    div[data-testid="stButton"] > button[kind="secondary"] {
+        background: #ffffff;
+        border: 1.5px solid rgba(0,102,204,0.2);
+        color: #0066cc;
+        font-size: 0.82rem;
+        font-weight: 600;
+        padding: 8px 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,102,204,0.08);
+        transition: all 0.2s ease;
+        font-family: 'Inter', sans-serif;
+        margin-bottom: 16px;
+    }
+    div[data-testid="stButton"] > button[kind="secondary"]:hover {
+        background: #0066cc;
+        color: #ffffff;
+        border-color: #0066cc;
+        box-shadow: 0 4px 16px rgba(0,102,204,0.2);
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+if st.button("← Back to Command Center"):
+    st.switch_page("app.py")
+
     styled_df = performance_df.style.apply(apply_gradient, axis=1)
     st.dataframe(styled_df, hide_index=True, use_container_width=True)
