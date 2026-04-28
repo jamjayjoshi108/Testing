@@ -216,7 +216,7 @@ st.markdown('<div class="section-label">Operational Modules</div>', unsafe_allow
 
 # ── Modules ───────────────────────────────────────────────────────────────────
 modules = [
-    {"icon": "📱", "title": "PTW Application",    "page": "ptw"},
+    {"icon": "📱", "title": "PTW App",    "page": "ptw"},
     {"icon": "💡", "title": "Outage Reduction Plan (ORP)", "page": "orp"},
     {"icon": "🛡️", "title": "RDSS",                        "page": "rdss"},
     {"icon": "📟", "title": "Smart Meter",                  "page": "smart_meter"},
@@ -227,6 +227,7 @@ modules = [
 
 cols1 = st.columns(3, gap="medium")
 cols2 = st.columns(3, gap="medium")
+cols3 = st.columns(3, gap="medium")
 
 for i, (col, mod) in enumerate(zip(cols1, modules[:3])):
     with col:
