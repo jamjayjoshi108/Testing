@@ -216,7 +216,7 @@ st.markdown('<div class="section-label">Operational Modules</div>', unsafe_allow
 
 # ── Modules ───────────────────────────────────────────────────────────────────
 modules = [
-    {"icon": "🔐", "title": "PTW, LM-ALM Application",    "page": "ptw"},
+    {"icon": "🔐", "title": "PTW Application",    "page": "ptw"},
     {"icon": "📉", "title": "Outage Reduction Plan (ORP)", "page": "orp"},
     {"icon": "🛡️", "title": "RDSS",                        "page": "rdss"},
     {"icon": "📟", "title": "Smart Meter",                  "page": "smart_meter"},
