@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone, date
 # ─────────────────────────────────────────────────────────────
 # PAGE CONFIGURATION
 # ─────────────────────────────────────────────────────────────
-st.set_page_config(page_title="Power Outage Monitoring Dashboard", layout="wide")
+st.set_page_config(page_title="Power Outage Monitoring Dashboard jjj", layout="wide")
 
 # ─────────────────────────────────────────────────────────────
 # GLOBAL TABLE HEADER STYLING
