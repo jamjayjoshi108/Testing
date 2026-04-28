@@ -360,7 +360,7 @@ with kpi6:
 # REGIONAL BREAKDOWN
 # ─────────────────────────────────────────────────────────────
 st.divider()
-st.subheader("🗺️ Regional Breakdown")
+st.subheader("Zonal Breakdown")
 
 jes   = df.groupby('zone_name')['permit_je'].nunique().reindex(ZONES, fill_value=0)
 grids = df.groupby('zone_name')['grid_code'].nunique().reindex(ZONES, fill_value=0)
