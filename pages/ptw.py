@@ -357,6 +357,85 @@ with kpi6:
     )
 
 # ─────────────────────────────────────────────────────────────
+# REGIONAL BREAKDOWN
+# ─────────────────────────────────────────────────────────────
+st.divider()
+st.subheader("🗺️ Regional Breakdown")
+
+jes   = df.groupby('zone_name')['permit_je'].nunique().reindex(ZONES, fill_value=0)
+grids = df.groupby('zone_name')['grid_code'].nunique().reindex(ZONES, fill_value=0)
+pspcl = df[df['grid_ownership'] == 'PSPCL'].groupby('zone_name')['grid_code'].nunique().reindex(ZONES, fill_value=0)
+pstcl = df[df['grid_ownership'] == 'PSTCL'].groupby('zone_name')['grid_code'].nunique().reindex(ZONES, fill_value=0)
+ptws  = df.groupby('zone_name')['ptw_id'].nunique().reindex(ZONES, fill_value=0)
+dur   = df.groupby('zone_name')['duration_hrs'].mean().reindex(ZONES)
+
+data_dict = {
+    "Metric": [
+        "Total PTWs Issued",
+        "JEs Using PTW",
+        "Share: JEs Using PTW / Total JEs",
+        "Grids Using PTW",
+        "PSPCL Grids Using PTW",
+        "PSTCL Grids Using PTW",
+        "Share: PSPCL Grids / Total PSPCL",
+        "Share: PSTCL Grids / Total PSTCL",
+        "Avg PTW Duration (hrs)",
+    ]
+}
+
+for z in ZONES:
+    je_den    = ZONE_TOTALS[z]['Total JEs']
+    je_share  = f"{(jes[z] / je_den):.1%}" if je_den > 0 else "0.0%"
+    pspcl_den = ZONE_TOTALS[z]['PSPCL_G']
+    pstcl_den = ZONE_TOTALS[z]['PSTCL_G']
+
+    if z in ['South', 'East']:
+        combined_pspcl = pspcl['South'] + pspcl['East']
+        pspcl_share    = f"{(combined_pspcl / 219):.1%}"
+        combined_pstcl = pstcl['South'] + pstcl['East']
+        pstcl_share    = f"{(combined_pstcl / 38):.1%}"
+    else:
+        pspcl_share = f"{(pspcl[z] / pspcl_den):.1%}" if pspcl_den > 0 else "0.0%"
+        pstcl_share = f"{(pstcl[z] / pstcl_den):.1%}" if pstcl_den > 0 else "0.0%"
+
+    avg_d = f"{dur[z]:.1f}" if pd.notna(dur[z]) else "N/A"
+
+    data_dict[z] = [
+        int(ptws[z]), int(jes[z]), je_share,
+        int(grids[z]), int(pspcl[z]), int(pstcl[z]),
+        pspcl_share, pstcl_share, avg_d,
+    ]
+
+performance_df = pd.DataFrame(data_dict)
+
+def apply_gradient(row):
+    styles = [''] * len(row)
+    if "Share" in str(row.iloc[0]):
+        vals = []
+        for val in row.iloc[1:]:
+            try:    vals.append(float(str(val).strip('%')))
+            except: vals.append(None)
+        valid_vals = [v for v in vals if v is not None]
+        if not valid_vals:
+            return styles
+        min_val, max_val = min(valid_vals), max(valid_vals)
+        for i, val in enumerate(vals):
+            if val is not None:
+                norm = (val - min_val) / (max_val - min_val) if max_val > min_val else 0.5
+                if norm < 0.5:
+                    pct = norm / 0.5
+                    r, g, b = int(248+(255-248)*pct), int(105+(235-105)*pct), int(107+(132-107)*pct)
+                else:
+                    pct = (norm-0.5)/0.5
+                    r, g, b = int(255+(99-255)*pct), int(235+(195-235)*pct), int(132+(132-132)*pct)
+                styles[i+1] = f'background-color:rgba({r},{g},{b},0.6);color:#000000;font-weight:500;'
+    return styles
+
+styled_df = performance_df.style.apply(apply_gradient, axis=1).set_table_styles(HEADER_STYLES)
+st.dataframe(styled_df, hide_index=True, use_container_width=True)
+
+
+# ─────────────────────────────────────────────────────────────
 # PTW STATUS OVERVIEW
 # ─────────────────────────────────────────────────────────────
 st.divider()
@@ -445,80 +524,3 @@ feeder_df.rename(columns={'feeders': 'Feeder', 'PTWs': 'PTWs Issued', 'JEs': 'JE
 st.caption("Top 20 Feeders by PTW Activity")
 st.dataframe(feeder_df.style.set_table_styles(HEADER_STYLES), hide_index=True, use_container_width=True)
 
-# ─────────────────────────────────────────────────────────────
-# REGIONAL BREAKDOWN
-# ─────────────────────────────────────────────────────────────
-st.divider()
-st.subheader("🗺️ Regional Breakdown")
-
-jes   = df.groupby('zone_name')['permit_je'].nunique().reindex(ZONES, fill_value=0)
-grids = df.groupby('zone_name')['grid_code'].nunique().reindex(ZONES, fill_value=0)
-pspcl = df[df['grid_ownership'] == 'PSPCL'].groupby('zone_name')['grid_code'].nunique().reindex(ZONES, fill_value=0)
-pstcl = df[df['grid_ownership'] == 'PSTCL'].groupby('zone_name')['grid_code'].nunique().reindex(ZONES, fill_value=0)
-ptws  = df.groupby('zone_name')['ptw_id'].nunique().reindex(ZONES, fill_value=0)
-dur   = df.groupby('zone_name')['duration_hrs'].mean().reindex(ZONES)
-
-data_dict = {
-    "Metric": [
-        "Total PTWs Issued",
-        "JEs Using PTW",
-        "Share: JEs Using PTW / Total JEs",
-        "Grids Using PTW",
-        "PSPCL Grids Using PTW",
-        "PSTCL Grids Using PTW",
-        "Share: PSPCL Grids / Total PSPCL",
-        "Share: PSTCL Grids / Total PSTCL",
-        "Avg PTW Duration (hrs)",
-    ]
-}
-
-for z in ZONES:
-    je_den    = ZONE_TOTALS[z]['Total JEs']
-    je_share  = f"{(jes[z] / je_den):.1%}" if je_den > 0 else "0.0%"
-    pspcl_den = ZONE_TOTALS[z]['PSPCL_G']
-    pstcl_den = ZONE_TOTALS[z]['PSTCL_G']
-
-    if z in ['South', 'East']:
-        combined_pspcl = pspcl['South'] + pspcl['East']
-        pspcl_share    = f"{(combined_pspcl / 219):.1%}"
-        combined_pstcl = pstcl['South'] + pstcl['East']
-        pstcl_share    = f"{(combined_pstcl / 38):.1%}"
-    else:
-        pspcl_share = f"{(pspcl[z] / pspcl_den):.1%}" if pspcl_den > 0 else "0.0%"
-        pstcl_share = f"{(pstcl[z] / pstcl_den):.1%}" if pstcl_den > 0 else "0.0%"
-
-    avg_d = f"{dur[z]:.1f}" if pd.notna(dur[z]) else "N/A"
-
-    data_dict[z] = [
-        int(ptws[z]), int(jes[z]), je_share,
-        int(grids[z]), int(pspcl[z]), int(pstcl[z]),
-        pspcl_share, pstcl_share, avg_d,
-    ]
-
-performance_df = pd.DataFrame(data_dict)
-
-def apply_gradient(row):
-    styles = [''] * len(row)
-    if "Share" in str(row.iloc[0]):
-        vals = []
-        for val in row.iloc[1:]:
-            try:    vals.append(float(str(val).strip('%')))
-            except: vals.append(None)
-        valid_vals = [v for v in vals if v is not None]
-        if not valid_vals:
-            return styles
-        min_val, max_val = min(valid_vals), max(valid_vals)
-        for i, val in enumerate(vals):
-            if val is not None:
-                norm = (val - min_val) / (max_val - min_val) if max_val > min_val else 0.5
-                if norm < 0.5:
-                    pct = norm / 0.5
-                    r, g, b = int(248+(255-248)*pct), int(105+(235-105)*pct), int(107+(132-107)*pct)
-                else:
-                    pct = (norm-0.5)/0.5
-                    r, g, b = int(255+(99-255)*pct), int(235+(195-235)*pct), int(132+(132-132)*pct)
-                styles[i+1] = f'background-color:rgba({r},{g},{b},0.6);color:#000000;font-weight:500;'
-    return styles
-
-styled_df = performance_df.style.apply(apply_gradient, axis=1).set_table_styles(HEADER_STYLES)
-st.dataframe(styled_df, hide_index=True, use_container_width=True)
