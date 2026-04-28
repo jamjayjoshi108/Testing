@@ -128,32 +128,24 @@ def clean_outage_data(df):
             lambda x: 'Active' if str(x).strip().upper() in ['OPEN', 'ACTIVE'] else 'Closed'
         )
 
-    # ── Recalculate duration using start_time → supply_restored_time ──
-    if 'start_time' in df.columns and 'supply_restored_time' in df.columns:
-        # Strip timezone from both columns to avoid tz mismatch errors
-        df['start_time']           = pd.to_datetime(df['start_time'],           errors='coerce').dt.tz_localize(None)
+    # ── Use duration_minutes directly from CSV ────────────────────────
+    if 'duration_minutes' in df.columns:
+        df['duration_minutes'] = pd.to_numeric(df['duration_minutes'], errors='coerce').fillna(0)
+
+    # ── Parse start/end times (for display only, not for calculation) ─
+    if 'start_time' in df.columns:
+        df['start_time'] = pd.to_datetime(df['start_time'], errors='coerce').dt.tz_localize(None)
+
+    if 'supply_restored_time' in df.columns:
         df['supply_restored_time'] = pd.to_datetime(df['supply_restored_time'], errors='coerce').dt.tz_localize(None)
 
-        # Where supply_restored_time is missing → outage still ongoing → use now as end
-        now_naive     = pd.Timestamp.now()
-        effective_end = df['supply_restored_time'].fillna(now_naive)
-
-        df['duration_minutes'] = (
-            (effective_end - df['start_time'])
-            .dt.total_seconds()
-            .div(60)
-            .clip(lower=0)
-            .round(2)
-        )
-
-        # Flag ongoing outages explicitly
+    # ── Flag ongoing: supply_restored_time is missing ─────────────────
+    if 'supply_restored_time' in df.columns:
         df['is_ongoing'] = df['supply_restored_time'].isna()
-
-    elif 'duration_minutes' in df.columns:
-        df['duration_minutes'] = pd.to_numeric(df['duration_minutes'], errors='coerce').fillna(0)
+    else:
         df['is_ongoing'] = False
 
-    # Duration bucket
+    # ── Duration bucket ───────────────────────────────────────────────
     if 'duration_minutes' in df.columns:
         def assign_bucket(mins):
             if mins < 0: return "Active/Unknown"
