@@ -6,6 +6,14 @@ from datetime import datetime, timedelta, timezone, date
 # PAGE CONFIGURATION
 # ─────────────────────────────────────────────────────────────
 st.set_page_config(page_title="Power Outage Monitoring Dashboard", layout="wide")
+st.markdown("""
+<style>
+    /* Hide sidebar and its toggle */
+    [data-testid="stSidebar"] { display: none !important; }
+    [data-testid="collapsedControl"] { display: none !important; }
+    #MainMenu, footer, header { visibility: hidden; }
+</style>
+""", unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────
 # GLOBAL TABLE HEADER STYLING
@@ -53,6 +61,35 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# ── Back Button ──────────────────────────────────────────────────────────────
+st.markdown("""
+<style>
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #ffffff;
+        border: 1.5px solid rgba(0,102,204,0.2);
+        color: #0066cc;
+        font-size: 0.82rem;
+        font-weight: 600;
+        padding: 8px 18px;
+        border-radius: 10px;
+        text-decoration: none;
+        margin: 12px 0 18px 0;
+        box-shadow: 0 2px 8px rgba(0,102,204,0.08);
+        transition: all 0.2s ease;
+        font-family: 'Inter', sans-serif;
+    }
+    .back-btn:hover {
+        background: #0066cc;
+        color: #ffffff;
+        transform: translateX(-3px);
+        box-shadow: 0 4px 16px rgba(0,102,204,0.2);
+    }
+</style>
+<a href="/" target="_self" class="back-btn">← Back to Command Center</a>
+""", unsafe_allow_html=True)
 # ─────────────────────────────────────────────────────────────
 # IST TIMEZONE
 # ─────────────────────────────────────────────────────────────
