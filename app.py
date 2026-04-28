@@ -249,11 +249,11 @@ st.markdown('<div class="section-label">Operational Modules</div>', unsafe_allow
 # ── Modules ───────────────────────────────────────────────────────────────────
 modules = [
     {"icon": "📱", "title": "PTW App",    "page": "ptw",    "status": True},
+    {"icon": "🚨", "title": "Outage Monitoring",            "page": "outage_mon",    "status": True},
     {"icon": "💡", "title": "Outage Reduction Plan (ORP)", "page": "orp",     "status": False},
     {"icon": "🛡️", "title": "RDSS",                        "page": "rdss",    "status": False},
     {"icon": "📟", "title": "Smart Meter",                  "page": "smart_meter",     "status": False},
     {"icon": "🔌", "title": "New Connections",              "page": "new_conn",    "status": False},
-    {"icon": "🚨", "title": "Outage Monitoring",            "page": "outage_mon",    "status": True},
     {"icon": "🤕", "title": "Consumer Complaints",            "page": "consumer_complaints",    "status": False}
 ]
 
