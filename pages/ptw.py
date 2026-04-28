@@ -12,6 +12,22 @@ st.set_page_config(page_title="PTW Tracker", layout="wide")
 # ─────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
+    [data-testid="stSidebar"]        { display: none !important; }
+    [data-testid="collapsedControl"] { display: none !important; }
+    #MainMenu, footer, header        { visibility: hidden; }
+
+    /* ── Remove top whitespace ── */
+    .block-container {
+        padding-top: 1rem !important;    /* ← was ~6rem by default */
+    }
+    [data-testid="stEmpty"] {
+        display: none !important;        /* ← collapses the loader placeholder after .empty() */
+    }
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<style>
     [data-testid="stSidebar"]       { display: none !important; }
     [data-testid="collapsedControl"] { display: none !important; }
     #MainMenu, footer, header       { visibility: hidden; }
