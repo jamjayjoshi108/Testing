@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 # ─────────────────────────────────────────────────────────────
 # PAGE CONFIG
 # ─────────────────────────────────────────────────────────────
-st.set_page_config(page_title="PTW & LM-ALM Tracker", layout="wide")
+st.set_page_config(page_title="PTW Tracker", layout="wide")
 
 # ─────────────────────────────────────────────────────────────
 # HIDE SIDEBAR + GLOBAL STYLES
@@ -153,7 +153,7 @@ if st.button("← Back to Command Center"):
 # ─────────────────────────────────────────────────────────────
 # MAIN DASHBOARD
 # ─────────────────────────────────────────────────────────────
-st.title("🛠️ PTW & LM-ALM Tracker")
+st.title("🛠️ PTW Tracker")
 
 full_df = load_csv_data()
 
