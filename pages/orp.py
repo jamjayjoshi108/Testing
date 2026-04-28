@@ -131,7 +131,7 @@ if st.button("← Back to Command Center"):
 
 # ── Title ─────────────────────────────────────────────────────────────────────
 st.markdown("""
-<div class="page-title">💡 Outage Reduction <span>Plan (ORP)</span></div>
+<div class="page-title">💡 Outage Reduction Plan <span>(ORP)</span></div>
 <div class="divider"></div>
 """, unsafe_allow_html=True)
 
