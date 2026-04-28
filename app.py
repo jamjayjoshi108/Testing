@@ -28,6 +28,73 @@ st.markdown("""
         min-height: 100vh;
     }
 
+    .block-container {
+        padding-top: clamp(10px, 2.5vh, 36px) !important;
+        padding-bottom: clamp(10px, 2vh, 24px) !important;
+        padding-left: clamp(16px, 4vw, 64px) !important;
+        padding-right: clamp(16px, 4vw, 64px) !important;
+        max-width: 100% !important;
+    }
+    [data-testid="stSidebar"] { display: none !important; }
+    [data-testid="collapsedControl"] { display: none !important; }
+
+    /* ── Header Bar ── */
+    .header-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: clamp(10px, 1.8vh, 24px) clamp(16px, 2.5vw, 32px);
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+        border: 1.5px solid rgba(0,102,204,0.08);
+        margin-bottom: clamp(10px, 1.5vh, 20px);
+        animation: fadeSlideDown 0.7s ease both;
+    }
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: clamp(10px, 1.5vw, 20px);
+    }
+    .header-logo {
+        width: clamp(48px, 6vw, 72px);
+        height: auto;
+        filter: drop-shadow(0 2px 6px rgba(0,0,0,0.1));
+    }
+    .header-dept-name {
+        color: #0066cc;
+        font-size: clamp(0.7rem, 1.1vw, 0.92rem);
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+    }
+    .header-dept-sub {
+        color: #8a9ab5;
+        font-size: clamp(0.6rem, 0.8vw, 0.72rem);
+        font-weight: 500;
+        margin-top: 2px;
+    }
+    .header-right h1 {
+        font-size: clamp(1.4rem, 3vw, 2.4rem);
+        font-weight: 800;
+        color: #0d1f3c;
+        margin: 0;
+        letter-spacing: -0.5px;
+        line-height: 1.1;
+        text-align: right;
+    }
+    .header-right h1 span {
+        background: linear-gradient(90deg, #0066cc, #0099ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    @keyframes fadeSlideDown {
+        from { opacity: 0; transform: translateY(-24px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Status dots ── */
     .status-dot-green {
         display: inline-block;
         width: 8px; height: 8px;
@@ -37,16 +104,6 @@ st.markdown("""
         top: 14px; right: 14px;
         box-shadow: 0 0 0 0 rgba(0,204,102,0.4);
         animation: pulseGreen 2s infinite;
-    }
-    /* Remove underline from card titles */
-    .card-title {
-        text-decoration: none !important;
-    }
-    
-    /* Remove default anchor underline everywhere in cards */
-    .module-card, .module-card:hover, .module-card:visited, .module-card:active {
-        text-decoration: none !important;
-        color: inherit !important;
     }
     .status-dot-red {
         display: inline-block;
@@ -69,71 +126,12 @@ st.markdown("""
         100% { box-shadow: 0 0 0 0 rgba(255,59,59,0); }
     }
 
-    .block-container {
-        padding-top: clamp(10px, 2.5vh, 36px) !important;
-        padding-bottom: clamp(10px, 2vh, 24px) !important;
-        padding-left: clamp(16px, 4vw, 64px) !important;
-        padding-right: clamp(16px, 4vw, 64px) !important;
-        max-width: 100% !important;
-    }
-    [data-testid="stSidebar"] { display: none !important; }
-    [data-testid="collapsedControl"] { display: none !important; }
-
-    /* ── Hero ── */
-    .hero {
-    text-align: center;
-    padding: clamp(8px, 1.5vh, 16px) 20px clamp(2px, 0.4vh, 6px);
-    animation: fadeSlideDown 0.7s ease both;
-    }
-    @keyframes fadeSlideDown {
-        from { opacity: 0; transform: translateY(-24px); }
-        to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .hero-logo {
-        width: clamp(60px, 8vw, 90px);
-        height: auto;
-        margin-bottom: clamp(6px, 1vh, 12px);
-        filter: drop-shadow(0 2px 8px rgba(0,0,0,0.12));
-        animation: fadeSlideDown 0.6s ease both;
-    }
-
-    .hero-dept {
-        color: #0066cc;
-        font-size: clamp(0.7rem, 1.1vw, 0.88rem);
-        font-weight: 700;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        margin-bottom: clamp(4px, 0.6vh, 8px);
-        animation: fadeSlideDown 0.7s ease both;
-    }
-
-    .hero h1 {
-        font-size: clamp(1.6rem, 3.8vw, 3rem);
-        font-weight: 800;
-        color: #0d1f3c;
-        margin: 0 0 clamp(2px, 0.5vh, 8px);
-        letter-spacing: -0.5px;
-        line-height: 1.15;
-    }
-
-    .hero h1 span {
-        background: linear-gradient(90deg, #0066cc, #0099ff);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-
     /* ── Divider ── */
-    # .divider {
-    #     height: 1.5px;
-    #     background: linear-gradient(90deg, transparent, rgba(0,102,204,0.3), transparent);
-    #     margin: clamp(6px, 1vh, 14px) 60px clamp(8px, 1.5vh, 20px);
-    #     animation: fadeSlideDown 0.9s ease both;
-    # }
-    .hero {
-    text-align: center;
-    padding: clamp(8px, 1.5vh, 16px) 20px clamp(2px, 0.4vh, 6px);
-    animation: fadeSlideDown 0.7s ease both;
+    .divider {
+        height: 1.5px;
+        background: linear-gradient(90deg, transparent, rgba(0,102,204,0.3), transparent);
+        margin: clamp(4px, 0.6vh, 8px) 60px clamp(6px, 1vh, 14px);
+        animation: fadeSlideDown 0.9s ease both;
     }
 
     /* ── Section label ── */
@@ -166,7 +164,12 @@ st.markdown("""
         justify-content: center;
         box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
         margin-bottom: clamp(8px, 1.4vh, 18px);
-        text-decoration: none;
+        text-decoration: none !important;
+        color: inherit !important;
+    }
+    .module-card:hover, .module-card:visited, .module-card:active {
+        text-decoration: none !important;
+        color: inherit !important;
     }
 
     .module-card::before {
@@ -217,6 +220,7 @@ st.markdown("""
         letter-spacing: 0.1px;
         line-height: 1.4;
         padding: 0 8px;
+        text-decoration: none !important;
     }
 
     .card-arrow {
@@ -234,6 +238,7 @@ st.markdown("""
 
     [data-testid="column"] { padding: 0 clamp(4px, 0.5vw, 10px) !important; }
 
+    /* ── Footer ── */
     .footer {
         text-align: center;
         color: #b0bdd0;
@@ -245,12 +250,20 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ── Hero ──────────────────────────────────────────────────────────────────────
+# ── Header ────────────────────────────────────────────────────────────────────
 st.markdown("""
-<div class="hero">
-    <img src="https://raw.githubusercontent.com/jamjayjoshi108/Testing/main/gop logo.png" class="hero-logo" alt="Govt of Punjab Logo"/>
-    <div class="hero-dept">Punjab Development Commission</div>
-    <h1>PSPCL <span>Operations</span></h1>
+<div class="header-bar">
+    <div class="header-left">
+        <img src="https://raw.githubusercontent.com/jamjayjoshi108/Testing/main/logo.png"
+             class="header-logo" alt="Govt of Punjab"/>
+        <div>
+            <div class="header-dept-name">Punjab Development Commission</div>
+            <div class="header-dept-sub">Government of Punjab</div>
+        </div>
+    </div>
+    <div class="header-right">
+        <h1>PSPCL <span>Operations</span></h1>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
