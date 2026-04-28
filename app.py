@@ -274,6 +274,6 @@ for i, (col, mod) in enumerate(zip(all_cols, modules)):
 # ── Footer ────────────────────────────────────────────────────────────────────
 st.markdown("""
 <div class="footer">
-    © 2026 Utility Operations Command Center &nbsp;·&nbsp; Powered by Real-Time Analytics
+    Wrought with ❤️ by Jay Joshi
 </div>
 """, unsafe_allow_html=True)
