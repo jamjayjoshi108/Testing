@@ -556,9 +556,14 @@ with tab1:
         if not filtered_tab1.empty:
         
             def build_circle_summary(df, label):
-                """Build a circle-wise summary table for a given outage type filtered to > 4 hrs."""
-                source = df[df['duration_minutes'] > 240].copy()
-        
+                """Build a circle-wise summary table for a given outage type filtered to > 4 hrs, excluding cancelled."""
+                
+                # ── Filter: > 4 hours AND exclude Cancelled status ───────────────
+                source = df[
+                    (df['duration_minutes'] > 240) &
+                    (~df['status_calc'].astype(str).str.upper().isin(['CANCELLED', 'CANCEL']))
+                ].copy()
+            
                 if source.empty:
                     st.info(f"No {label} outages longer than 4 hours.")
                     return
