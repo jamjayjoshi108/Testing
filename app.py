@@ -12,61 +12,47 @@ st.markdown("""
 
     html, body, [class*="css"] {
         font-family: 'Inter', sans-serif;
-        height: 100%;
-        overflow: hidden;
-        margin: 0; padding: 0;
     }
 
-    #MainMenu, footer, header {visibility: hidden;}
+    #MainMenu, footer, header { visibility: hidden; }
 
     .stApp {
         background: linear-gradient(135deg, #0a1628 0%, #0d2347 40%, #0a1f3f 100%);
-        height: 100vh;
-        overflow: hidden;
+        min-height: 100vh;
     }
 
-    /* Make the main block fill full height with flex column */
+    /* Remove streamlit default padding */
     .block-container {
-        padding: 0 3rem !important;
+        padding-top: 2vh !important;
+        padding-bottom: 2vh !important;
+        padding-left: 3vw !important;
+        padding-right: 3vw !important;
         max-width: 100% !important;
-        height: 100vh !important;
-        overflow: hidden !important;
-        display: flex !important;
-        flex-direction: column !important;
-        justify-content: center !important;
-    }
-
-    /* Remove excess gaps from streamlit internals */
-    [data-testid="stVerticalBlock"] {
-        gap: 0 !important;
-    }
-    [data-testid="stVerticalBlockBorderWrapper"] {
-        height: 100%;
     }
 
     /* Hero */
     .hero {
         text-align: center;
-        padding: 0 20px 12px;
+        padding: clamp(10px, 2vh, 30px) 20px clamp(6px, 1vh, 20px);
     }
     .hero-badge {
         display: inline-block;
         background: rgba(0, 180, 255, 0.15);
         border: 1px solid rgba(0, 180, 255, 0.4);
         color: #00b4ff;
-        font-size: 0.7rem;
+        font-size: clamp(0.6rem, 1vw, 0.75rem);
         font-weight: 600;
         letter-spacing: 2px;
         text-transform: uppercase;
         padding: 5px 16px;
         border-radius: 20px;
-        margin-bottom: 10px;
+        margin-bottom: clamp(6px, 1vh, 16px);
     }
     .hero h1 {
-        font-size: 2.4rem;
+        font-size: clamp(1.4rem, 4vw, 2.8rem);
         font-weight: 800;
         color: #ffffff;
-        margin: 0 0 0px;
+        margin: 0 0 clamp(4px, 0.8vh, 14px);
         letter-spacing: -0.5px;
         line-height: 1.2;
     }
@@ -80,106 +66,94 @@ st.markdown("""
     .divider {
         height: 1px;
         background: linear-gradient(90deg, transparent, rgba(0,180,255,0.4), transparent);
-        margin: 10px 40px 16px;
+        margin: clamp(4px, 0.8vh, 10px) 40px clamp(8px, 1.5vh, 24px);
     }
 
     /* Section label */
     .section-label {
         color: #3d6a8a;
-        font-size: 0.68rem;
+        font-size: clamp(0.6rem, 1vw, 0.72rem);
         font-weight: 700;
         letter-spacing: 2.5px;
         text-transform: uppercase;
         text-align: center;
-        margin-bottom: 14px;
+        margin-bottom: clamp(8px, 1.5vh, 20px);
     }
 
-    /* Cards — tall and spacious */
+    /* Cards */
     .module-card {
         background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
         border: 1px solid rgba(255,255,255,0.1);
         border-radius: 16px;
-        padding: 0;
+        padding: clamp(18px, 3vh, 36px) clamp(12px, 2vw, 24px);
         text-align: center;
         cursor: pointer;
         transition: all 0.3s ease;
         position: relative;
         overflow: hidden;
-        height: 26vh;
-        min-height: 160px;
+        min-height: clamp(120px, 18vh, 200px);
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         backdrop-filter: blur(10px);
+        margin-bottom: clamp(8px, 1.5vh, 16px);
     }
     .module-card:hover {
-        border-color: rgba(0, 180, 255, 0.55);
+        border-color: rgba(0, 180, 255, 0.5);
         background: linear-gradient(145deg, rgba(0,180,255,0.1), rgba(0,114,255,0.05));
         transform: translateY(-4px);
-        box-shadow: 0 14px 40px rgba(0, 114, 255, 0.25);
+        box-shadow: 0 12px 40px rgba(0, 114, 255, 0.2);
     }
     .card-icon {
-        font-size: 2.6rem;
-        margin-bottom: 14px;
+        font-size: clamp(1.6rem, 3vw, 2.4rem);
+        margin-bottom: clamp(8px, 1.2vh, 14px);
         filter: drop-shadow(0 0 8px rgba(0,180,255,0.5));
     }
     .card-title {
         color: #e0eaf5;
-        font-size: 0.95rem;
+        font-size: clamp(0.78rem, 1.4vw, 1rem);
         font-weight: 600;
         letter-spacing: 0.2px;
-        padding: 0 12px;
     }
     .card-arrow {
         position: absolute;
         bottom: 12px; right: 16px;
-        color: rgba(0,180,255,0.35);
+        color: rgba(0,180,255,0.4);
         font-size: 0.9rem;
         transition: all 0.3s;
     }
-    .module-card:hover .card-arrow {
-        color: #00b4ff;
-        transform: translateX(3px);
-    }
+    .module-card:hover .card-arrow { color: #00b4ff; transform: translateX(3px); }
 
-    /* Invisible Streamlit buttons overlaid on cards */
+    /* Streamlit buttons styled to look like "Open" links */
     .stButton > button {
         background: transparent !important;
-        border: none !important;
-        color: transparent !important;
-        height: 0px !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        min-height: 0 !important;
-        font-size: 0 !important;
-        cursor: pointer !important;
-        position: relative;
-        top: -26vh;
-        width: 100%;
-        z-index: 10;
+        border: 1px solid rgba(0,180,255,0.2) !important;
+        color: #3d6a8a !important;
+        font-size: 0.7rem !important;
+        font-weight: 500 !important;
+        border-radius: 8px !important;
+        padding: 4px 0 !important;
+        margin-top: 2px !important;
+        width: 100% !important;
+        transition: all 0.2s !important;
+        letter-spacing: 0.5px;
     }
     .stButton > button:hover {
-        background: transparent !important;
-        box-shadow: none !important;
+        border-color: #00b4ff !important;
+        color: #00b4ff !important;
+        background: rgba(0,180,255,0.05) !important;
     }
 
-    /* Column padding */
-    [data-testid="column"] {
-        padding: 0 10px !important;
-    }
-
-    /* Row gap between two card rows */
-    .row-gap {
-        height: 16px;
-    }
+    /* Column spacing */
+    [data-testid="column"] { padding: 0 clamp(4px, 0.5vw, 10px) !important; }
 
     /* Footer */
     .footer {
         text-align: center;
         color: #2d4a62;
-        font-size: 0.72rem;
-        padding: 14px 20px 0;
+        font-size: clamp(0.65rem, 1vw, 0.75rem);
+        padding: clamp(8px, 1.5vh, 20px) 20px clamp(4px, 0.8vh, 10px);
         letter-spacing: 0.3px;
     }
 </style>
@@ -219,10 +193,8 @@ for col, mod in zip(cols1, modules[:3]):
             <div class="card-arrow">→</div>
         </div>
         """, unsafe_allow_html=True)
-        if st.button(f"Open {mod['title']}", key=mod['key'], use_container_width=True):
+        if st.button(f"Open →  {mod['title']}", key=mod['key'], use_container_width=True):
             st.toast(f"🚀 Opening {mod['title']}...", icon="⚡")
-
-st.markdown('<div class="row-gap"></div>', unsafe_allow_html=True)
 
 for col, mod in zip(cols2, modules[3:]):
     with col:
@@ -233,10 +205,8 @@ for col, mod in zip(cols2, modules[3:]):
             <div class="card-arrow">→</div>
         </div>
         """, unsafe_allow_html=True)
-        if st.button(f"Open {mod['title']}", key=mod['key'], use_container_width=True):
+        if st.button(f"Open →  {mod['title']}", key=mod['key'], use_container_width=True):
             st.toast(f"🚀 Opening {mod['title']}...", icon="⚡")
 
 # ── Footer ────────────────────────────────────────────────────────────────────
-st.markdown("""
-<div class="footer">Wrought with ❤️ by Jay Joshi</div>
-""", unsafe_allow_html=True)
+st.markdown('<div class="footer">Wrought with ❤️ by Jay Joshi</div>', unsafe_allow_html=True)
