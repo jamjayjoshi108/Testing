@@ -14,32 +14,40 @@ st.markdown("""
         font-family: 'Inter', sans-serif;
         height: 100%;
         overflow: hidden;
+        margin: 0; padding: 0;
     }
 
     #MainMenu, footer, header {visibility: hidden;}
 
-    /* Lock entire app to viewport — no scroll */
     .stApp {
         background: linear-gradient(135deg, #0a1628 0%, #0d2347 40%, #0a1f3f 100%);
         height: 100vh;
         overflow: hidden;
     }
 
-    /* Remove default streamlit block padding */
+    /* Make the main block fill full height with flex column */
     .block-container {
-        padding: 0 2rem !important;
+        padding: 0 3rem !important;
         max-width: 100% !important;
-        height: 100vh;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
+        height: 100vh !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
     }
 
-    /* Hero section — compact */
+    /* Remove excess gaps from streamlit internals */
+    [data-testid="stVerticalBlock"] {
+        gap: 0 !important;
+    }
+    [data-testid="stVerticalBlockBorderWrapper"] {
+        height: 100%;
+    }
+
+    /* Hero */
     .hero {
         text-align: center;
-        padding: 18px 20px 6px;
+        padding: 0 20px 12px;
     }
     .hero-badge {
         display: inline-block;
@@ -50,15 +58,15 @@ st.markdown("""
         font-weight: 600;
         letter-spacing: 2px;
         text-transform: uppercase;
-        padding: 4px 14px;
+        padding: 5px 16px;
         border-radius: 20px;
-        margin-bottom: 8px;
+        margin-bottom: 10px;
     }
     .hero h1 {
-        font-size: 2rem;
+        font-size: 2.4rem;
         font-weight: 800;
         color: #ffffff;
-        margin: 0 0 4px;
+        margin: 0 0 0px;
         letter-spacing: -0.5px;
         line-height: 1.2;
     }
@@ -72,7 +80,7 @@ st.markdown("""
     .divider {
         height: 1px;
         background: linear-gradient(90deg, transparent, rgba(0,180,255,0.4), transparent);
-        margin: 6px 40px 10px;
+        margin: 10px 40px 16px;
     }
 
     /* Section label */
@@ -83,21 +91,22 @@ st.markdown("""
         letter-spacing: 2.5px;
         text-transform: uppercase;
         text-align: center;
-        margin-bottom: 10px;
+        margin-bottom: 14px;
     }
 
-    /* Module cards — compact height */
+    /* Cards — tall and spacious */
     .module-card {
         background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
         border: 1px solid rgba(255,255,255,0.1);
-        border-radius: 14px;
-        padding: 18px 16px 28px;
+        border-radius: 16px;
+        padding: 0;
         text-align: center;
         cursor: pointer;
         transition: all 0.3s ease;
         position: relative;
         overflow: hidden;
-        height: 130px;
+        height: 26vh;
+        min-height: 160px;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -105,28 +114,28 @@ st.markdown("""
         backdrop-filter: blur(10px);
     }
     .module-card:hover {
-        border-color: rgba(0, 180, 255, 0.5);
+        border-color: rgba(0, 180, 255, 0.55);
         background: linear-gradient(145deg, rgba(0,180,255,0.1), rgba(0,114,255,0.05));
-        transform: translateY(-3px);
-        box-shadow: 0 10px 30px rgba(0, 114, 255, 0.2);
+        transform: translateY(-4px);
+        box-shadow: 0 14px 40px rgba(0, 114, 255, 0.25);
     }
     .card-icon {
-        font-size: 1.8rem;
-        margin-bottom: 8px;
-        filter: drop-shadow(0 0 6px rgba(0,180,255,0.5));
+        font-size: 2.6rem;
+        margin-bottom: 14px;
+        filter: drop-shadow(0 0 8px rgba(0,180,255,0.5));
     }
     .card-title {
         color: #e0eaf5;
-        font-size: 0.88rem;
+        font-size: 0.95rem;
         font-weight: 600;
-        margin-bottom: 4px;
         letter-spacing: 0.2px;
+        padding: 0 12px;
     }
     .card-arrow {
         position: absolute;
-        bottom: 10px; right: 14px;
-        color: rgba(0,180,255,0.4);
-        font-size: 0.85rem;
+        bottom: 12px; right: 16px;
+        color: rgba(0,180,255,0.35);
+        font-size: 0.9rem;
         transition: all 0.3s;
     }
     .module-card:hover .card-arrow {
@@ -134,7 +143,7 @@ st.markdown("""
         transform: translateX(3px);
     }
 
-    /* Hide the streamlit buttons visually but keep them functional */
+    /* Invisible Streamlit buttons overlaid on cards */
     .stButton > button {
         background: transparent !important;
         border: none !important;
@@ -146,7 +155,7 @@ st.markdown("""
         font-size: 0 !important;
         cursor: pointer !important;
         position: relative;
-        top: -134px;
+        top: -26vh;
         width: 100%;
         z-index: 10;
     }
@@ -155,21 +164,23 @@ st.markdown("""
         box-shadow: none !important;
     }
 
+    /* Column padding */
+    [data-testid="column"] {
+        padding: 0 10px !important;
+    }
+
+    /* Row gap between two card rows */
+    .row-gap {
+        height: 16px;
+    }
+
     /* Footer */
     .footer {
         text-align: center;
         color: #2d4a62;
         font-size: 0.72rem;
-        padding: 8px 20px 12px;
+        padding: 14px 20px 0;
         letter-spacing: 0.3px;
-    }
-
-    /* Remove gap between streamlit column elements */
-    [data-testid="column"] {
-        padding: 0 8px !important;
-    }
-    [data-testid="stVerticalBlock"] > div {
-        gap: 0 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -184,24 +195,36 @@ st.markdown("""
 
 st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
 
-# ── Module Data ───────────────────────────────────────────────────────────────
+# ── Modules ───────────────────────────────────────────────────────────────────
 modules = [
-    {"icon": "🔐", "title": "PTW, LM-ALM Application",    "color": "#00b4ff", "key": "ptw"},
-    {"icon": "📉", "title": "Outage Reduction Plan (ORP)", "color": "#ff6b35", "key": "orp"},
-    {"icon": "🛡️", "title": "RDSS",                        "color": "#7c4dff", "key": "rdss"},
-    {"icon": "📟", "title": "Smart Meter",                  "color": "#00e676", "key": "smart_meter"},
-    {"icon": "🔌", "title": "New Connections",              "color": "#ffca28", "key": "new_conn"},
-    {"icon": "⚠️", "title": "Outage Monitoring",            "color": "#ff4081", "key": "outage_mon"},
+    {"icon": "🔐", "title": "PTW, LM-ALM Application",    "key": "ptw"},
+    {"icon": "📉", "title": "Outage Reduction Plan (ORP)", "key": "orp"},
+    {"icon": "🛡️", "title": "RDSS",                        "key": "rdss"},
+    {"icon": "📟", "title": "Smart Meter",                  "key": "smart_meter"},
+    {"icon": "🔌", "title": "New Connections",              "key": "new_conn"},
+    {"icon": "⚠️", "title": "Outage Monitoring",            "key": "outage_mon"},
 ]
 
-# ── Section Label ─────────────────────────────────────────────────────────────
 st.markdown('<div class="section-label">Operational Modules</div>', unsafe_allow_html=True)
 
-# ── Cards Grid ────────────────────────────────────────────────────────────────
 cols1 = st.columns(3, gap="medium")
 cols2 = st.columns(3, gap="medium")
 
-for i, (col, mod) in enumerate(zip(cols1 + cols2, modules)):
+for col, mod in zip(cols1, modules[:3]):
+    with col:
+        st.markdown(f"""
+        <div class="module-card">
+            <div class="card-icon">{mod['icon']}</div>
+            <div class="card-title">{mod['title']}</div>
+            <div class="card-arrow">→</div>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button(f"Open {mod['title']}", key=mod['key'], use_container_width=True):
+            st.toast(f"🚀 Opening {mod['title']}...", icon="⚡")
+
+st.markdown('<div class="row-gap"></div>', unsafe_allow_html=True)
+
+for col, mod in zip(cols2, modules[3:]):
     with col:
         st.markdown(f"""
         <div class="module-card">
@@ -215,7 +238,5 @@ for i, (col, mod) in enumerate(zip(cols1 + cols2, modules)):
 
 # ── Footer ────────────────────────────────────────────────────────────────────
 st.markdown("""
-<div class="footer">
-    Wrought with ❤️ by Jay Joshi
-</div>
+<div class="footer">Wrought with ❤️ by Jay Joshi</div>
 """, unsafe_allow_html=True)
