@@ -388,15 +388,15 @@ with tab1:
     else:
         filtered_tab1 = pd.DataFrame()
     # ── TEMPORARY DEBUG: inspect specific feeder ─────────────────
+    st.warning("🛠️ DEBUG — All Tarn Taran Planned Outages")
     debug_feeder = filtered_tab1[
-        (filtered_tab1['feeder_name'].astype(str).str.upper().str.contains('BORDER', na=False)) &
-        (filtered_tab1['circle_name'].astype(str).str.upper().str.contains('TARN TARAN', na=False)) &
-        (filtered_tab1['outage_type'] == 'Planned Outage')
+        filtered_tab1['circle_name'].astype(str).str.upper().str.contains('TARN', na=False)
     ][['zone_name', 'circle_name', 'feeder_name', 'outage_type', 'start_time', 'end_time', 'duration_minutes', 'status_calc']]
-    
-    st.warning("🛠️ DEBUG — Border Feeder Planned Outage")
     st.dataframe(debug_feeder, use_container_width=True)
-    # ── END: TEMPORARY DEBUG: inspect specific feeder ─────────────────
+    
+    st.warning("🛠️ DEBUG — All unique circle names in filtered data")
+    st.write(sorted(filtered_tab1['circle_name'].dropna().unique().tolist()))
+    # ── END DEBUG ─────────────────────────────────────────────────
 
     if filtered_tab1.empty:
         st.info("No outage data found for the selected time period.")
