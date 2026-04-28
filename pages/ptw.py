@@ -50,26 +50,33 @@ def render_ptw_lm_dashboard():
     # ── Back Button ───────────────────────────────────────────────────────────
     st.markdown("""
     <style>
-        div[data-testid="stButton"] > button[kind="secondary"] {
-            background:#ffffff; border:1.5px solid rgba(0,102,204,0.2); color:#0066cc;
-            font-size:0.82rem; font-weight:600; padding:8px 20px; border-radius:10px;
-            box-shadow:0 2px 8px rgba(0,102,204,0.08); transition:all 0.2s ease;
-            font-family:'Inter',sans-serif; margin-bottom:16px;
-        }
-        div[data-testid="stButton"] > button[kind="secondary"]:hover {
-            background:#0066cc; color:#ffffff; border-color:#0066cc;
-            box-shadow:0 4px 16px rgba(0,102,204,0.2);
-        }
         .kpi-card {
-            background:linear-gradient(135deg,#004481 0%,#0066cc 100%);
-            border-radius:6px; padding:1.2rem;
-            box-shadow:0 2px 4px rgba(0,0,0,0.08); margin-bottom:1rem;
+            background: linear-gradient(135deg, #004481 0%, #0066cc 100%);
+            border-radius: 6px;
+            padding: 1rem 0.8rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            margin-bottom: 1rem;
+            min-width: 0;
         }
-        .kpi-title { color:#FFC107; font-weight:600; font-size:0.9rem;
-                     text-transform:uppercase; margin-bottom:0.2rem; }
-        .kpi-value { color:#FFFFFF; font-weight:700; font-size:2.2rem; line-height:1.2; }
+        .kpi-title {
+            color: #FFC107;
+            font-weight: 600;
+            font-size: 0.75rem;          /* slightly smaller label */
+            text-transform: uppercase;
+            margin-bottom: 0.3rem;
+            line-height: 1.3;
+        }
+        .kpi-value {
+            color: #FFFFFF;
+            font-weight: 700;
+            font-size: 1.6rem;           /* reduced from 2.2rem */
+            line-height: 1.2;
+            white-space: nowrap;         /* prevent mid-number line breaks */
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
     </style>
-    """, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
     col_title, col_btn = st.columns([0.85, 0.15])
     with col_title:
