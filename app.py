@@ -249,5 +249,15 @@ for i, (col, mod) in enumerate(zip(cols2, modules[3:])):
         </a>
         """, unsafe_allow_html=True)
 
+for i, (col, mod) in enumerate(zip(cols3, modules[3:])):
+    with col:
+        st.markdown(f"""
+        <a href="/{mod['page']}" target="_self" class="module-card card-{i+3}">
+            <div class="card-icon">{mod['icon']}</div>
+            <div class="card-title">{mod['title']}</div>
+            <div class="card-arrow">→</div>
+        </a>
+        """, unsafe_allow_html=True)
+
 # ── Footer ────────────────────────────────────────────────────────────────────
 st.markdown('<div class="footer">Wrought with ❤️ by Jay Joshi</div>', unsafe_allow_html=True)
