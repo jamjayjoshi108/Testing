@@ -553,6 +553,12 @@ with tab1:
         st.subheader("📋 Circle-wise Outage Summary")
 
         if not filtered_tab1.empty:
+            # ── Filter: only outages longer than 4 hours ──────────────────
+            summary_source = filtered_tab1[filtered_tab1['duration_minutes'] > 240].copy()
+        
+            if summary_source.empty:
+                st.info("No outages longer than 4 hours found for the selected time period.")
+            else:
             # Build summary: unique feeders with outages + avg duration per circle
             summary_df = filtered_tab1.groupby('circle_name').agg(
                 Total_Feeders_With_Outages=('feeder_name', 'nunique'),
