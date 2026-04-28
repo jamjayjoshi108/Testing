@@ -257,8 +257,7 @@ for i, (col, mod) in enumerate(zip(cols2, modules[3:])):
             <div class="card-arrow">→</div>
         </div>
         """, unsafe_allow_html=True)
-        if st.button("_", key=mod['key'], use_container_width=True):
-            st.toast(f"🚀 Opening {mod['title']}...", icon="⚡")
+        
 
 # ── Footer ────────────────────────────────────────────────────────────────────
 st.markdown('<div class="footer">Wrought with ❤️ by Jay Joshi</div>', unsafe_allow_html=True)
