@@ -119,40 +119,126 @@ PTW_COLS = [
 # ─────────────────────────────────────────────────────────────
 @st.cache_data(ttl=3600)
 def load_data():
-    with st.spinner("⏳ Loading data from PSPCL database..."):
-        df_outages = pd.read_csv(
-            OUTAGES_URL,
-            usecols=OUTAGES_COLS,
-            low_memory=False,
-            dtype={
-                "outage_id":        "str",
-                "zone_name":        "category",
-                "circle_name":      "category",
-                "feeder_name":      "category",
-                "outage_type":      "category",
-                "outage_status":    "category",
-                "duration_minutes": "float32",
-                "mother_station":          "str",
-                "feeding_grid":            "str",
-                "feeding_grid_ownership":  "str",
-                "division_name":           "category",
-                "subdivision_name":        "category",
-                "feeder_category":         "category",
-            },
-            parse_dates=["start_time", "supply_restored_time", "created_time"]
-        )
-        df_ptw = pd.read_csv(
-            PTW_URL,
-            usecols=PTW_COLS,
-            low_memory=False,
-            dtype={
-                "ptw_id":         "str",
-                "circle_name":    "category",
-                "current_status": "category",
-            },
-            parse_dates=["creation_date", "start_time", "end_time"]
-        )
+    # No spinner here — keep function clean for caching
+    df_outages = pd.read_csv(
+        OUTAGES_URL,
+        usecols=OUTAGES_COLS,
+        low_memory=False,
+        dtype={
+            "outage_id":               "str",
+            "zone_name":               "category",
+            "circle_name":             "category",
+            "feeder_name":             "category",
+            "outage_type":             "category",
+            "outage_status":           "category",
+            "duration_minutes":        "float32",
+            "mother_station":          "str",
+            "feeding_grid":            "str",
+            "feeding_grid_ownership":  "str",
+            "division_name":           "category",
+            "subdivision_name":        "category",
+            "feeder_category":         "category",
+        },
+        parse_dates=["start_time", "supply_restored_time", "created_time"]
+    )
+    df_ptw = pd.read_csv(
+        PTW_URL,
+        usecols=PTW_COLS,
+        low_memory=False,
+        dtype={
+            "ptw_id":         "str",
+            "circle_name":    "category",
+            "current_status": "category",
+        },
+        parse_dates=["creation_date", "start_time", "end_time"]
+    )
     return df_outages, df_ptw
+
+
+# ── Beautiful Loading UI ─────────────────────────────────────
+_load_placeholder = st.empty()
+
+if "data_loaded" not in st.session_state:
+    with _load_placeholder.container():
+        st.markdown("""
+        <style>
+        .loader-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 2rem;
+            background: linear-gradient(135deg, #003366 0%, #0055a5 100%);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 68, 129, 0.25);
+            margin: 4rem auto;
+            max-width: 520px;
+        }
+        .loader-icon {
+            font-size: 2.8rem;
+            margin-bottom: 0.6rem;
+            animation: pulse 1.8s ease-in-out infinite;
+        }
+        .loader-title {
+            color: #FFC107 !important;
+            font-size: 1.4rem !important;
+            font-weight: 700 !important;
+            margin-bottom: 0.3rem;
+            letter-spacing: 0.5px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .loader-subtitle {
+            color: #d0e8ff !important;
+            font-size: 0.88rem !important;
+            margin-bottom: 1.6rem;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .loader-bar-track {
+            width: 100%;
+            max-width: 380px;
+            height: 8px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+        .loader-bar-fill {
+            height: 100%;
+            width: 40%;
+            background: linear-gradient(90deg, #FFC107, #FFD966);
+            border-radius: 999px;
+            animation: slide 1.6s ease-in-out infinite;
+        }
+        @keyframes slide {
+            0%   { margin-left: -40%; }
+            100% { margin-left: 110%; }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1);   opacity: 1;   }
+            50%       { transform: scale(1.1); opacity: 0.8; }
+        }
+        </style>
+
+        <div class="loader-wrapper">
+            <div class="loader-icon">💡</div>
+            <div class="loader-title">Outage Monitoring</div>
+            <div class="loader-subtitle">Fetching latest data from S3 bucket…</div>
+            <div class="loader-bar-track">
+                <div class="loader-bar-fill"></div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    df_outages_raw, df_ptw_raw = load_data()
+    st.session_state["data_loaded"] = True
+    st.session_state["df_outages_raw"] = df_outages_raw
+    st.session_state["df_ptw_raw"]     = df_ptw_raw
+
+else:
+    df_outages_raw = st.session_state["df_outages_raw"]
+    df_ptw_raw     = st.session_state["df_ptw_raw"]
+
+_load_placeholder.empty()   # ← clears the loader once data is ready
+# ─────────────────────────────────────────────────────────────
 
 df_outages_raw, df_ptw_raw = load_data()
 
