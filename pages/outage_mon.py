@@ -105,7 +105,9 @@ PTW_URL     = "https://pspcl-dashboard-data.s3.ap-south-1.amazonaws.com/ptw_requ
 OUTAGES_COLS = [
     "outage_id", "zone_name", "circle_name", "feeder_name",
     "outage_type", "outage_status", "start_time", "supply_restored_time",
-    "duration_minutes", "created_time"
+    "duration_minutes", "created_time",
+    "mother_station", "feeding_grid", "feeding_grid_ownership",
+    "division_name", "subdivision_name", "feeder_category"
 ]
 PTW_COLS = [
     "ptw_id", "circle_name", "feeders", "current_status",
@@ -130,6 +132,12 @@ def load_data():
                 "outage_type":      "category",
                 "outage_status":    "category",
                 "duration_minutes": "float32",
+                "mother_station":          "str",
+                "feeding_grid":            "str",
+                "feeding_grid_ownership":  "str",
+                "division_name":           "category",
+                "subdivision_name":        "category",
+                "feeder_category":         "category",
             },
             parse_dates=["start_time", "supply_restored_time", "created_time"]
         )
@@ -674,44 +682,58 @@ with tab1:
             if source.empty:
                 st.info(f"No {label} feeder-level detail available.")
                 return
-
-            cols_needed = ['zone_name', 'circle_name', 'feeder_name', 'duration_minutes']
-            if 'division_name'   in source.columns: cols_needed.insert(2, 'division_name')
-            if 'substation_name' in source.columns: cols_needed.insert(3, 'substation_name')
-
+        
+            # Build cols_needed dynamically — always include new enrichment cols if present
+            base_cols    = ["mother_station", "feeding_grid", "feeding_grid_ownership",
+                            "zone_name", "circle_name", "division_name", "subdivision_name",
+                            "feeder_name", "feeder_category", "duration_minutes"]
+            cols_needed  = [c for c in base_cols if c in source.columns]
+        
             detail = source[cols_needed].copy()
-            detail['Hours'] = (detail['duration_minutes'] / 60).round(2)
-            detail = detail.drop(columns=['duration_minutes'])
-
-            rename_map = {'zone_name': 'Zone', 'circle_name': 'Circle', 'feeder_name': 'Feeder'}
-            if 'division_name'   in detail.columns: rename_map['division_name']   = 'Division'
-            if 'substation_name' in detail.columns: rename_map['substation_name'] = 'S/D'
-
-            detail = detail.rename(columns=rename_map)
-            detail = detail.sort_values(['Zone', 'Circle', 'Hours'], ascending=[True, True, False]).reset_index(drop=True)
-
-            gt_row = {c: '' for c in detail.columns}
-            gt_row['Zone']  = 'Grand Total'
-            gt_row['Hours'] = round(detail['Hours'].sum(), 2)
+            detail["Hours"] = (detail["duration_minutes"] / 60).round(2)
+            detail = detail.drop(columns=["duration_minutes"])
+        
+            rename_map = {
+                "mother_station":         "Mother Station",
+                "feeding_grid":           "Feeding Grid",
+                "feeding_grid_ownership": "Grid Ownership",
+                "zone_name":              "Zone",
+                "circle_name":            "Circle",
+                "division_name":          "Division",
+                "subdivision_name":       "Sub-Division",
+                "feeder_name":            "Feeder",
+                "feeder_category":        "Feeder Category",
+            }
+            detail = detail.rename(columns={k: v for k, v in rename_map.items() if k in detail.columns})
+            detail = detail.sort_values(
+                [c for c in ["Zone", "Circle", "Hours"] if c in detail.columns],
+                ascending=[True, True, False]
+            ).reset_index(drop=True)
+        
+            # Grand Total row
+            gt_row = {c: "" for c in detail.columns}
+            gt_row["Zone"]  = "Grand Total"
+            gt_row["Hours"] = round(detail["Hours"].sum(), 2)
             detail = pd.concat([detail, pd.DataFrame([gt_row])], ignore_index=True)
-
-            data_rows    = detail.index[detail['Zone'] != 'Grand Total']
-            unique_zones = detail.loc[data_rows, 'Zone'].unique().tolist()
-            zone_cmaps   = ['#EBF5FB', '#EAF4E8', '#FEF9E7', '#F5EEF8', '#FDFEFE', '#FEF5E7', '#E8F8F5', '#FDEDEC']
+        
+            data_rows     = detail.index[detail["Zone"] != "Grand Total"]
+            unique_zones  = detail.loc[data_rows, "Zone"].unique().tolist()
+            zone_cmaps    = ["#EBF5FB", "#EAF4E8", "#FEF9E7", "#F5EEF8",
+                             "#FDFEFE", "#FEF5E7", "#E8F8F5", "#FDEDEC"]
             zone_color_map = {zone: zone_cmaps[i % len(zone_cmaps)] for i, zone in enumerate(unique_zones)}
-
+        
             def color_by_zone(row):
-                if row['Zone'] == 'Grand Total':
-                    return ['font-weight: bold; background-color: #004085; color: #FFC107;'] * len(row)
-                return [f'background-color: {zone_color_map.get(row["Zone"], "#FFFFFF")};'] * len(row)
-
+                if row["Zone"] == "Grand Total":
+                    return ["font-weight: bold; background-color: #004085; color: #FFC107;"] * len(row)
+                return [f"background-color: {zone_color_map.get(row['Zone'], '#FFFFFF')};"] * len(row)
+        
             def style_drilldown(df):
                 styler = df.style
                 styler = styler.apply(color_by_zone, axis=1)
-                styler = styler.format({'Hours': '{:.2f}'}, na_rep='')
+                styler = styler.format({"Hours": "{:.2f}"}, na_rep="")
                 styler = styler.set_table_styles(HEADER_STYLES)
                 return styler
-
+        
             st.dataframe(style_drilldown(detail), use_container_width=True, hide_index=True)
 
         # SECTION A: Circle-wise Summary Tables
