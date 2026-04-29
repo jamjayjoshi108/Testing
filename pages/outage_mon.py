@@ -228,16 +228,18 @@ if "data_loaded" not in st.session_state:
         </div>
         """, unsafe_allow_html=True)
 
-    df_outages_raw, df_ptw_raw = load_data()
-    st.session_state["data_loaded"] = True
-    st.session_state["df_outages_raw"] = df_outages_raw
-    st.session_state["df_ptw_raw"]     = df_ptw_raw
+        # ✅ Load INSIDE the container so UI renders first, then data fetches
+        df_outages_raw, df_ptw_raw = load_data()
+
+    st.session_state["data_loaded"]     = True
+    st.session_state["df_outages_raw"]  = df_outages_raw
+    st.session_state["df_ptw_raw"]      = df_ptw_raw
 
 else:
     df_outages_raw = st.session_state["df_outages_raw"]
     df_ptw_raw     = st.session_state["df_ptw_raw"]
 
-_load_placeholder.empty()   # ← clears the loader once data is ready
+_load_placeholder.empty()  # clears loader once data is ready
 # ─────────────────────────────────────────────────────────────
 
 df_outages_raw, df_ptw_raw = load_data()
