@@ -117,7 +117,7 @@ PTW_COLS = [
 # ─────────────────────────────────────────────────────────────
 # DATA LOADING
 # ─────────────────────────────────────────────────────────────
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=3600, show_spinner=False)
 def load_data():
     # No spinner here — keep function clean for caching
     df_outages = pd.read_csv(
