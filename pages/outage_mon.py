@@ -838,7 +838,7 @@ with tab1:
         styler = styler.set_table_styles(HEADER_STYLES)
         return styler
 
-        st.dataframe(style_drilldown(detail), use_container_width=True, hide_index=True)
+    st.dataframe(style_drilldown(detail), use_container_width=True, hide_index=True)
 
         # SECTION A: Circle-wise Summary Tables
         st.markdown("**🔵 Planned Outages**")
