@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta, timezone, date
 
+pd.set_option("styler.render.max_elements", 2_000_000)
+
 # ─────────────────────────────────────────────────────────────
 # PAGE CONFIGURATION
 # ─────────────────────────────────────────────────────────────
@@ -771,11 +773,10 @@ with tab1:
                 st.info(f"No {label} feeder-level detail available.")
                 return
         
-            # Build cols_needed dynamically — always include new enrichment cols if present
-            base_cols    = ["mother_station", "feeding_grid", "feeding_grid_ownership",
-                            "zone_name", "circle_name", "division_name", "subdivision_name",
-                            "feeder_name", "feeder_category", "duration_minutes"]
-            cols_needed  = [c for c in base_cols if c in source.columns]
+            base_cols   = ["mother_station", "feeding_grid", "feeding_grid_ownership",
+                           "zone_name", "circle_name", "division_name", "subdivision_name",
+                           "feeder_name", "feeder_category", "duration_minutes"]
+            cols_needed = [c for c in base_cols if c in source.columns]
         
             detail = source[cols_needed].copy()
             detail["Hours"] = (detail["duration_minutes"] / 60).round(2)
@@ -804,25 +805,40 @@ with tab1:
             gt_row["Hours"] = round(detail["Hours"].sum(), 2)
             detail = pd.concat([detail, pd.DataFrame([gt_row])], ignore_index=True)
         
-            data_rows     = detail.index[detail["Zone"] != "Grand Total"]
-            unique_zones  = detail.loc[data_rows, "Zone"].unique().tolist()
-            zone_cmaps    = ["#EBF5FB", "#EAF4E8", "#FEF9E7", "#F5EEF8",
-                             "#FDFEFE", "#FEF5E7", "#E8F8F5", "#FDEDEC"]
-            zone_color_map = {zone: zone_cmaps[i % len(zone_cmaps)] for i, zone in enumerate(unique_zones)}
+            # ── Skip heavy styling for large datasets ────────────────
+            MAX_STYLE_CELLS = 200_000
+            total_cells     = detail.shape[0] * detail.shape[1]
         
-            def color_by_zone(row):
-                if row["Zone"] == "Grand Total":
-                    return ["font-weight: bold; background-color: #004085; color: #FFC107;"] * len(row)
-                return [f"background-color: {zone_color_map.get(row['Zone'], '#FFFFFF')};"] * len(row)
-        
-            def style_drilldown(df):
-                styler = df.style
-                styler = styler.apply(color_by_zone, axis=1)
-                styler = styler.format({"Hours": "{:.2f}"}, na_rep="")
-                styler = styler.set_table_styles(HEADER_STYLES)
-                return styler
-        
-            st.dataframe(style_drilldown(detail), use_container_width=True, hide_index=True)
+            if total_cells > MAX_STYLE_CELLS:
+                st.caption(f"⚠️ Large dataset ({len(detail):,} rows) — zone colouring disabled for performance.")
+                st.dataframe(
+                    detail.style
+                        .format({"Hours": "{:.2f}"}, na_rep="")
+                        .set_table_styles(HEADER_STYLES),
+                    use_container_width=True, hide_index=True
+                )
+                return
+
+    # ── Full styled render for normal-sized datasets ──────────
+    data_rows      = detail.index[detail["Zone"] != "Grand Total"]
+    unique_zones   = detail.loc[data_rows, "Zone"].unique().tolist()
+    zone_cmaps     = ["#EBF5FB", "#EAF4E8", "#FEF9E7", "#F5EEF8",
+                      "#FDFEFE", "#FEF5E7", "#E8F8F5", "#FDEDEC"]
+    zone_color_map = {zone: zone_cmaps[i % len(zone_cmaps)] for i, zone in enumerate(unique_zones)}
+
+    def color_by_zone(row):
+        if row["Zone"] == "Grand Total":
+            return ["font-weight: bold; background-color: #004085; color: #FFC107;"] * len(row)
+        return [f"background-color: {zone_color_map.get(row['Zone'], '#FFFFFF')};"] * len(row)
+
+    def style_drilldown(df):
+        styler = df.style
+        styler = styler.apply(color_by_zone, axis=1)
+        styler = styler.format({"Hours": "{:.2f}"}, na_rep="")
+        styler = styler.set_table_styles(HEADER_STYLES)
+        return styler
+
+    st.dataframe(style_drilldown(detail), use_container_width=True, hide_index=True)
 
         # SECTION A: Circle-wise Summary Tables
         st.markdown("**🔵 Planned Outages**")
